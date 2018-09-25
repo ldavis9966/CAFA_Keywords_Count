@@ -4,7 +4,7 @@ import re
 import csv
 import constant
 import file_list as fl
-
+import tarfile
 
 '''
 To do list:
@@ -95,15 +95,23 @@ authorsList = {}
 # Directory walk the data folder and place all the CAFA filenames in a Python List.
 #fileCount = fl.create_file_list(fileList)
 fileCount = fl.create_file_list_from_tar(fileList)
-print(fileList)
+
 
 
 filesProcessed = 0
 for file in fileList:
-    fh = open(fileList[file]['path']+"/"+file, "r")
+#    fh = open(fileList[file]['path']+"/"+file, "r")
+    tarf = tarfile.open(constant.TAR_DATA_ROOT_DIRECTORY + "/" + constant.TAR_FILE_NAME)
+    fh = tarf.extractfile(fileList[file]['path']+"/"+file)
+
+
+
 
     # See if AUTHOR is in the first line. Extract the team name if so.
     curLine = fh.readline()
+    if type(curLine) is bytes:
+        curLine = curLine.decode('utf-8')
+
     if 'AUTHOR' not in curLine:
         print("\nError: AUTHOR not found in file.")
         printfile(fileList[file]['path'], file)
@@ -114,6 +122,9 @@ for file in fileList:
 
     # See if MODEL is in the second line. Extract Model # if so.
     curLine = fh.readline()
+    if type(curLine) is bytes:
+        curLine = curLine.decode('utf-8')
+
     if 'MODEL' not in curLine:
         print("\nError: MODEL not found in file.")
         printfile(fileList[file]['path'], file)
@@ -146,6 +157,9 @@ for file in fileList:
         print("\t\t\t"+fileList[file]['path'], file)
 
     curLine = fh.readline()
+    if type(curLine) is bytes:
+        curLine = curLine.decode('utf-8')
+
     if 'KEYWORDS' not in curLine:
         print("\nError: KEYWORDS tag not found in file.")
         printfile(fileList[file]['path'], file)
