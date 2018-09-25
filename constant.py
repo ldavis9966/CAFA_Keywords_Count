@@ -1,5 +1,7 @@
 
 DATA_ROOT_DIRECTORY = 'data/raw_submission'
+TAR_DATA_ROOT_DIRECTORY = 'data'
+TAR_FILE_NAME = 'raw_submission.tar.gz'
 
 METHODOLOGY_KEYWORDS = ('sequence alignment',
                         'sequence-profile alignment',

@@ -3,6 +3,8 @@ import os
 import re
 import csv
 import constant
+import file_list as fl
+
 
 '''
 To do list:
@@ -45,6 +47,8 @@ data
                                                                 (TeamID)_(Model #)_(Taxon ID).txt
 
 
+NOTE: For this program to execute, the DATA_ROOT_DIRECTORY path must be set in the file constant.py. This path must 
+        lead to the folder with the TEAM NAMES directory as shown above.  
 '''
 
 methodology_keyword_count = {'sequence alignment': 0,
@@ -89,10 +93,10 @@ fileList = {}
 authorsList = {}
 
 # Directory walk the data folder and place all the CAFA filenames in a Python List.
-for dirpath, dirnames, filenames in os.walk(constant.DATA_ROOT_DIRECTORY):
-    for file in filenames:
-        fileList[file] = {'path': dirpath}
-        fileCount += 1
+#fileCount = fl.create_file_list(fileList)
+fileCount = fl.create_file_list_from_tar(fileList)
+print(fileList)
+
 
 filesProcessed = 0
 for file in fileList:
@@ -167,7 +171,7 @@ for file in fileList:
     # This code block checks if current author is not in the author list. If not present then create a new nested
     # dictionary of both the taxonID and then another nested dictionary using the current model #.
     if author not in authorsList:
-        authorsList[author] = {taxonID:{model: {}}}
+        authorsList[author] = {taxonID: {model: {}}}
     # Otherwise the author already has an entry. Now check if the current taxonID is present. If not then create
     # a double nested dictionary for the author using the current taxonID and model #.
     elif taxonID not in authorsList[author]:
@@ -205,7 +209,7 @@ csvHeader.insert(2, "Model Number")
 
 # Create csv file of keywords used for each team's taxonID and model #
 with open('team_model_taxonID_keyword.csv', 'w', newline='') as csvfile:
-    writer = csv.DictWriter(csvfile,fieldnames=csvHeader)
+    writer = csv.DictWriter(csvfile, fieldnames=csvHeader)
     writer.writeheader()
     for author in authorsList:
         for taxonID in authorsList[author]:
@@ -236,7 +240,7 @@ for author in authorsList:
 csvHeader = list(constant.METHODOLOGY_KEYWORDS)
 csvHeader.insert(0, "")
 with open('total_keyword_counts.csv', 'w', newline='') as csvfile:
-    writer = csv.DictWriter(csvfile,fieldnames=csvHeader)
+    writer = csv.DictWriter(csvfile, fieldnames=csvHeader)
     writer1 = csv.writer(csvfile, delimiter=' ', quotechar="", quoting=csv.QUOTE_NONE)
 
     writer1.writerow('Total_Keyword_Count')
@@ -263,7 +267,3 @@ print("\nMODEL METHODOLOGY KEYWORD COUNT DICTIONARY")
 print(model_methodology_keyword_count)
 print("\nNumber of files discovered:", fileCount)
 print("\nNumber of files processed", filesProcessed)
-
-
-
-
