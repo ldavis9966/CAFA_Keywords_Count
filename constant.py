@@ -1,7 +1,11 @@
 
 DATA_ROOT_DIRECTORY = 'data/raw_submission'
+CSV_OUTPUT_DIRECTORY = 'csv_files'
 TAR_DATA_ROOT_DIRECTORY = 'data'
 TAR_FILE_NAME = 'raw_submission.tar.gz'
+
+USE_ZIPPED_FILES = False #True
+
 
 METHODOLOGY_KEYWORDS = ('sequence alignment',
                         'sequence-profile alignment',
