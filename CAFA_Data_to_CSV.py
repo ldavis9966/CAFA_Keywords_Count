@@ -67,3 +67,16 @@ print("\nMODEL METHODOLOGY KEYWORD COUNT DICTIONARY")
 print(kc.model_methodology_keyword_count)
 print("\nNumber of files discovered:", fileCount)
 print("\nNumber of files processed", filesProcessed)
+
+
+#results{}
+
+print("Before")
+for author in authorsList:
+    for taxonID in authorsList[author]:
+        if author == 'CaoLab1' and taxonID == '9606':
+            print(author,taxonID, authorsList[author][taxonID].keys())
+#            print(author,taxonID, authorsList[author][taxonID])
+print("After")
+
+
