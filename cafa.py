@@ -49,25 +49,37 @@ class cafa:
         file_name = self.fmax_files_directory + '/' + ontology + "_" + taxon_name + '_' + "type" + str(type) + '_' +\
                     'mode' + str(mode) + '_all_fmax_sheet.csv'
 
-
+        fmax_sum = 0;
         with open(file_name, newline='') as csvfile:
             reader = csv.DictReader(csvfile)
             for i, row in enumerate(reader):
-                if i > 1:   # first 2 rows are non team data
+                if i > 1 and float(row['Coverage']) != 0:   # Skip if row is one of first 2 rows or coverage = 0
+                    fmax_sum += float(row['F1-max'])
+
+        output_dict = {}
+        with open(file_name, newline='') as csvfile:
+            reader = csv.DictReader(csvfile)
+            for i, row in enumerate(reader):
+                if i > 1 and float(row['Coverage']) != 0:   # Skip if row is one of first 2 rows or coverage = 0
                     team = row['ID-model'][:-2]
                     model = row['ID-model'][len(row['ID-model'])-1:]
                     #print(row['ID-model'], team, model)
 
-        located_dict = self.author_list[team][]
-        for author in self.author_list:
-            if author == team:
-                for dict_taxonID in self.author_list[author]
-                    if dict_taxonID == taxonID:
-                        for dict_model in self.author_list[author][]
-            for taxonID in self.author_list[author]
-                for model in self.author_list[author]
+                    if team in self.author_list:
+                        if str(taxonID) in self.author_list[team]:
+                            if model in self.author_list[team][str(taxonID)]:
+                                for kwd in self.author_list[team][str(taxonID)][model]:
+                                    self.keyword_fmax_score[kwd] += float(row['F1-max'])
+                            else:
+                                raise KeyError("Model " + model + " not found in author_list for taxonID: " +
+                                               str(taxonID) + " Author: " + team)
+                        else:
+                            raise KeyError("TaxonID: " + str(taxonID) + "not found in author list for author: " + team)
+                    else:
+                        raise KeyError(team + " not found in author_list for taxonID: " + str(taxonID))
 
-
+        print('KEYWORD FMAX SCORES:')
+        print(self.keyword_fmax_score)
 
         print('ontology:', ontology)
         print('taxonID', taxonID)

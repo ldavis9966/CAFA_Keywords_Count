@@ -74,7 +74,7 @@ print("\nNumber of files processed", filesProcessed)
 print("Before")
 for author in authorsList:
     for taxonID in authorsList[author]:
-        if author == 'CaoLab1' and taxonID == '9606':
+        if author == 'casadiobolognabiocomputinggroup' and taxonID == '9606':
             print(author,taxonID, authorsList[author][taxonID].keys())
 #            print(author,taxonID, authorsList[author][taxonID])
 print("After")
