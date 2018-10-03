@@ -12,4 +12,15 @@ cobj.set_path_fmax_files(const.FMAX_FILES_DIRECTORY)
 cobj.create_author_kwd_taxon_dict()
 cobj.fmax_kwdscores_by_taxonID('BPO', 1, 1, 9606)
 
-print("Taxon:", taxon.taxon_name_converter(7227))
+print(cobj.keyword_fmax_score)
+print(cobj.keyword_relative_fmax_score)
+
+#sum = 0
+#for kwd in cobj.keyword_relative_fmax_score:
+#    sum += cobj.keyword_relative_fmax_score[kwd]
+#print(sum)
+#sum = 0
+#for kwd in cobj.keyword_fmax_score:
+#    sum += cobj.keyword_fmax_score[kwd]
+#print(sum)
+#print("Taxon:", taxon.taxon_name_converter(7227))

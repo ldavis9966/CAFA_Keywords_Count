@@ -25,8 +25,9 @@ def create_author_list(authors_list, file_list):
             printfile(file_list[file]['path'], file)
             break
 
-        author = curLine[len('AUTHOR '):]
-        author = author.replace("\n", "")
+        author_in_file = curLine[len('AUTHOR '):].lower()
+        author_in_file = author_in_file.strip()
+        author_inf_file = author_in_file.replace("\n", "")
 
         # See if MODEL is in the second line. Extract Model # if so.
         curLine = fh.readline()
@@ -38,31 +39,34 @@ def create_author_list(authors_list, file_list):
             printfile(file_list[file]['path'], file)
             break
 
-        model = curLine[len('MODEL '):]
-        model = model.replace("\n", "")
-        model = model.strip(" ")
+        model_in_file = curLine[len('MODEL '):]
+        model_in_file = model_in_file.replace("\n", "")
+        model_in_file = model_in_file.strip(" ")
 
         fileStrSplit = file.split('_')
+        author = fileStrSplit[0].strip().lower()
+        model = fileStrSplit[1].strip()
         taxonID = fileStrSplit[2].split('.')[0].strip(" ")
 
         # Check if model # and Author (Team Name) are the 1st two items in the file name per CAFA specifications
-        if author not in fileStrSplit and model not in fileStrSplit:
+        if author_in_file.lower() != fileStrSplit[0].lower() or model_in_file != fileStrSplit[1]:
             print("\nError: filename conflicts with file data")
-            print("\tFilename string: ", file)
-            print("\tFile string parse:", fileStrSplit)
-            if author != fileStrSplit[0]:
+            print("\tFile: "+file_list[file]['path'] + "/" + file)
+            #print("\tFilename string: ", file)
+            #print("\tFile string parse:", fileStrSplit)
+            if author_in_file.lower() != fileStrSplit[0].lower():
                 print("\t\tAuthor in filename does not match author shown in file")
                 print("\t\t\tAuthor (file name):", fileStrSplit[0])
-                print("\t\t\tAuthor (in file):", author)
+                print("\t\t\tAuthor (in file):", author_in_file)
                 # Assume the file name author is the correct author name
-                author = fileStrSplit[0]
-            if model != fileStrSplit[1]:
+                #author = fileStrSplit[0]
+            if model_in_file != fileStrSplit[1]:
                 print("\t\tModel # in filename does not match model # shown in file")
                 print("\t\t\tModel (file name):", fileStrSplit[1])
-                print("\t\t\tModel (in file):", model)
+                print("\t\t\tModel (in file):", model_in_file)
                 # Assume the file name model # is the correct model number
-                model = fileStrSplit[1]
-            print("\t\t\t"+file_list[file]['path'], file)
+                #model = fileStrSplit[1]
+
 
         curLine = fh.readline()
         if type(curLine) is bytes:

@@ -13,11 +13,11 @@ def create_file_list(fileList):
         #    tarf = tarfile.open("data.tar.gz")
 
         for tarinfo in tarf:
-            if tarinfo.isreg():
-                tmp = tarinfo.name.split("/")
-                filename = tmp[len(tmp) - 1]
-                del tmp[-1]
-                path = ""
+            if tarinfo.isreg():                 # Check tarinfo is a file, and not a directory
+                tmp = tarinfo.name.split("/")   # Split out the path+filename strings into a tuple using '/'
+                filename = tmp[len(tmp) - 1]    # Get filename from last tuple
+                del tmp[-1]                     # last entry from tuple which is the filename.
+                path = ""                       # now rebuild the path from the tuple.
                 for dir in tmp:
                     path = path + dir + "/"
                 path = path.strip("/")

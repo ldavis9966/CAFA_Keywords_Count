@@ -2,6 +2,7 @@ import file_list as fl
 import author_list as al
 import taxon
 import csv
+import math
 
 class cafa:
 
@@ -41,6 +42,15 @@ class cafa:
             'genome environment': 0, 'operon': 0, 'ortholog': 0, 'paralog': 0, 'homolog': 0, 'hidden Markov model': 0,
             'clinical data': 0, 'genetic data': 0, 'natural language processing': 0, 'other functional information': 0}
 
+        self.keyword_relative_fmax_score = {
+            'sequence alignment': 0, 'sequence-profile alignment': 0, 'profile-profile alignment': 0,
+            'phylogeny': 0,'sequence properties': 0, 'physicochemical properties': 0, 'predicted properties': 0,
+            'protein interactions': 0, 'gene expression': 0, 'mass spectrometry': 0, 'genetic interactions': 0,
+            'protein structure': 0, 'literature': 0, 'genomic context': 0, 'synteny': 0, 'structure alignment': 0,
+            'comparative model': 0, 'predicted protein structure': 0, 'de novo prediction': 0, 'machine learning': 0,
+            'genome environment': 0, 'operon': 0, 'ortholog': 0, 'paralog': 0, 'homolog': 0, 'hidden Markov model': 0,
+            'clinical data': 0, 'genetic data': 0, 'natural language processing': 0, 'other functional information': 0}
+
         ontology = ontology.upper().lower()
         if ( (ontology != 'mfo') and (ontology != 'bpo') and (ontology != 'cco') ):
             raise ValueError("Ontology not recognized. Must be BPO, CCO, or MFO.")
@@ -50,26 +60,35 @@ class cafa:
                     'mode' + str(mode) + '_all_fmax_sheet.csv'
 
         fmax_sum = 0;
+        total_num_fmax_scores = 0
         with open(file_name, newline='') as csvfile:
             reader = csv.DictReader(csvfile)
             for i, row in enumerate(reader):
-                if i > 1 and float(row['Coverage']) != 0:   # Skip if row is one of first 2 rows or coverage = 0
+                if i > 1 and float(row['Coverage']) != 0.0:   # Skip if row is one of first 2 rows or coverage = 0
                     fmax_sum += float(row['F1-max'])
+                    total_num_fmax_scores += 1
 
+        #print(fmax_sum)
+        #print(total_num_fmax_scores)
+
+        fnum = 0 #### DEBUG CODE
         output_dict = {}
         with open(file_name, newline='') as csvfile:
             reader = csv.DictReader(csvfile)
             for i, row in enumerate(reader):
-                if i > 1 and float(row['Coverage']) != 0:   # Skip if row is one of first 2 rows or coverage = 0
-                    team = row['ID-model'][:-2]
+                if i > 1 and float(row['Coverage']) != 0.0:   # Skip if row is one of first 2 rows or coverage = 0
+                    team = row['ID-model'][:-2].lower()
                     model = row['ID-model'][len(row['ID-model'])-1:]
                     #print(row['ID-model'], team, model)
+
+                    fnum += float(row['F1-max']) / fmax_sum  ## DEBUG code
 
                     if team in self.author_list:
                         if str(taxonID) in self.author_list[team]:
                             if model in self.author_list[team][str(taxonID)]:
                                 for kwd in self.author_list[team][str(taxonID)][model]:
-                                    self.keyword_fmax_score[kwd] += float(row['F1-max'])
+                                    self.keyword_relative_fmax_score[kwd] += float(row['F1-max'])/fmax_sum
+                                    self.keyword_fmax_score[kwd] += 1.0/total_num_fmax_scores
                             else:
                                 raise KeyError("Model " + model + " not found in author_list for taxonID: " +
                                                str(taxonID) + " Author: " + team)
@@ -77,6 +96,8 @@ class cafa:
                             raise KeyError("TaxonID: " + str(taxonID) + "not found in author list for author: " + team)
                     else:
                         raise KeyError(team + " not found in author_list for taxonID: " + str(taxonID))
+                        #print(str(i)+":"+team + " not found in author_list for taxonID: " + str(taxonID))
+
 
         print('KEYWORD FMAX SCORES:')
         print(self.keyword_fmax_score)
@@ -85,3 +106,11 @@ class cafa:
         print('taxonID', taxonID)
         print(file_name)
 
+        print("fnum:", fnum)
+        print("total num fmax_scores:", total_num_fmax_scores)
+
+        print('SORTED')
+        for kwd in sorted(self.keyword_relative_fmax_score.items()):
+            print("Keyword: ", kwd)#, "/t Value: ", self.keyword_relative_fmax_score[kwd])
+
+        #sorted(self.keyword_fmax_score)
