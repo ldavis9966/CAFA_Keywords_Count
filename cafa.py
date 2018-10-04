@@ -2,7 +2,8 @@ import file_list as fl
 import author_list as al
 import taxon
 import csv
-import math
+import operator
+import matplotlib as plt
 
 class cafa:
 
@@ -59,7 +60,7 @@ class cafa:
         file_name = self.fmax_files_directory + '/' + ontology + "_" + taxon_name + '_' + "type" + str(type) + '_' +\
                     'mode' + str(mode) + '_all_fmax_sheet.csv'
 
-        fmax_sum = 0;
+        fmax_sum = 0
         total_num_fmax_scores = 0
         with open(file_name, newline='') as csvfile:
             reader = csv.DictReader(csvfile)
@@ -68,11 +69,6 @@ class cafa:
                     fmax_sum += float(row['F1-max'])
                     total_num_fmax_scores += 1
 
-        #print(fmax_sum)
-        #print(total_num_fmax_scores)
-
-        fnum = 0 #### DEBUG CODE
-        output_dict = {}
         with open(file_name, newline='') as csvfile:
             reader = csv.DictReader(csvfile)
             for i, row in enumerate(reader):
@@ -80,8 +76,6 @@ class cafa:
                     team = row['ID-model'][:-2].lower()
                     model = row['ID-model'][len(row['ID-model'])-1:]
                     #print(row['ID-model'], team, model)
-
-                    fnum += float(row['F1-max']) / fmax_sum  ## DEBUG code
 
                     if team in self.author_list:
                         if str(taxonID) in self.author_list[team]:
@@ -99,18 +93,8 @@ class cafa:
                         #print(str(i)+":"+team + " not found in author_list for taxonID: " + str(taxonID))
 
 
-        print('KEYWORD FMAX SCORES:')
-        print(self.keyword_fmax_score)
-
-        print('ontology:', ontology)
-        print('taxonID', taxonID)
-        print(file_name)
-
-        print("fnum:", fnum)
-        print("total num fmax_scores:", total_num_fmax_scores)
-
-        print('SORTED')
-        for kwd in sorted(self.keyword_relative_fmax_score.items()):
-            print("Keyword: ", kwd)#, "/t Value: ", self.keyword_relative_fmax_score[kwd])
-
-        #sorted(self.keyword_fmax_score)
+        # Debug Code
+        sorted_fmax_rel = sorted(self.keyword_relative_fmax_score.items(), key=operator.itemgetter(1), reverse=True)
+        sorted_fmax = sorted(self.keyword_fmax_score, key=operator.itemgetter(1), reverse=True)
+        for item in sorted_fmax_rel:
+            print("%s ---> %.2f" % ( item[0], item[1]))
