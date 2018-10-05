@@ -4,16 +4,19 @@ import taxon
 
 cobj = cafa.cafa()
 
-
-cobj.set_path_cafa_team_files(const.DATA_ROOT_DIRECTORY)
-cobj.set_path_zipped_files(const.TAR_DATA_ROOT_DIRECTORY)
-cobj.set_path_fmax_files(const.FMAX_FILES_DIRECTORY)
-
 cobj.create_author_kwd_taxon_dict()
-cobj.fmax_kwdscores_by_taxonID('BPO', 1, 1, 9606)
+cobj.fmax_kwdscores_by_taxonID(1, 1, 9606)
 
-print(cobj.keyword_fmax_score)
-print(cobj.keyword_relative_fmax_score)
+#cobj.plot_ontology_fmax_results('BPO')
+#cobj.plot_ontology_fmax_results('CCO')
+cobj.plot_ontology_fmax_results('MFO')
+
+
+#print('TAXON NAME: '+cobj.taxon_name)
+#print('TAXON NAME: '+cobj.taxon_name)
+
+#print(cobj.keyword_fmax_score)
+#print(cobj.keyword_relative_fmax_score)
 
 #sum = 0
 #for kwd in cobj.keyword_relative_fmax_score:

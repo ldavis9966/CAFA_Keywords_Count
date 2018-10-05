@@ -38,3 +38,5 @@ METHODOLOGY_KEYWORDS = ('sequence alignment',
                         'genetic data',
                         'natural language processing',
                         'other functional information')
+
+ONTOLOGY_LIST = ('BPO', 'CCO', 'MFO')
