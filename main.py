@@ -9,7 +9,9 @@ cobj.fmax_kwdscores_by_taxonID(1, 1, 9606)
 
 #cobj.plot_ontology_fmax_results('BPO')
 #cobj.plot_ontology_fmax_results('CCO')
-cobj.plot_ontology_fmax_results('MFO')
+#cobj.plot_ontology_fmax_results('MFO')
+
+cobj.csv_ontology_fmax_results(1, 1, 9606)
 
 
 #print('TAXON NAME: '+cobj.taxon_name)
