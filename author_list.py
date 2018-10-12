@@ -132,4 +132,16 @@ def printfile(path, filename):
     print("File Path + Name:", path+"/"+filename)
     return
 
+# Returns a dictionary where the number of each taxonID is the {Key: value} = {taxonID: count}
+def taxonID_counts(author_list):
+    taxonID_counts = {}
+    for author in author_list:
+        for taxonID in author_list[author]:
+            if taxonID not in taxonID_counts:
+                taxonID_counts[taxonID] = 1
+            else:
+                taxonID_counts[taxonID] += 1
+    return taxonID_counts
+
+
 

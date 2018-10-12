@@ -2,7 +2,7 @@ import cafa
 import constant as const
 import taxon
 
-cobj = cafa.cafa()
+cobj = cafa.Cafa()
 
 cobj.create_author_kwd_taxon_dict()
 cobj.fmax_kwdscores_by_taxonID(1, 1, 9606)
@@ -10,10 +10,29 @@ cobj.fmax_kwdscores_by_taxonID(1, 1, 9606)
 #cobj.plot_ontology_fmax_results('BPO')
 #cobj.plot_ontology_fmax_results('CCO')
 #cobj.plot_ontology_fmax_results('MFO')
+#cobj.csv_ontology_fmax_results(1, 1, 9606)
 
-cobj.csv_ontology_fmax_results(1, 1, 9606)
+print("\n\nAuthor List:")
+#print(cobj.keyword_relative_fmax_score)
+#print(cobj.keyword_fmax_score_template)
+#print(cobj.author_list)
+cobj.create_taxonID_dictionary()
+print(cobj.taxonID_counts)
+cobj.create_taxonID_list()
+print(cobj.taxonID_list)
+
+ontologies_list = ('BPO', 'CCO', 'MFO')
+bpo_taxons = ("ARATH", "BACSU", "CANAX", "DANRE", "DICDI", "DROME", "ECOLI", "eukarya", "HUMAN", "MOUSE", "prokarya", "RAT", "SCHPO")
+cco_taxons = ("ARATH", "CANAX", "DICDI", "DROME", "ECOLI", "eukarya", "HUMAN", "MOUSE", "prokarya", "RAT")
+mfo_taxons = ("ARATH", "BACSU", "DROME", "ECOLI", "eukarya", "HUMAN", "MOUSE", "prokarya", "RAT", "SALTY", "SCHPO")
+
+cobj.fmax_kwdscores_by_ontology_taxon_list(1, 1, ontologies=ontologies_list, bpo_taxons = bpo_taxons, cco_taxons = cco_taxons, mfo_taxons=mfo_taxons)
 
 
+
+
+
+#DEBUG CODE
 #print('TAXON NAME: '+cobj.taxon_name)
 #print('TAXON NAME: '+cobj.taxon_name)
 
@@ -29,3 +48,4 @@ cobj.csv_ontology_fmax_results(1, 1, 9606)
 #    sum += cobj.keyword_fmax_score[kwd]
 #print(sum)
 #print("Taxon:", taxon.taxon_name_converter(7227))
+# END DEBUG CODE

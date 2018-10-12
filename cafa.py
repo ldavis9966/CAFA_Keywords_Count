@@ -7,21 +7,19 @@ import matplotlib.pyplot as plt
 import numpy as np
 import constant as const
 
-class cafa:
 
-    #cafa
-    #DATA_ROOT_DIRECTORY = 'data/raw_submission'
-    #CSV_OUTPUT_DIRECTORY = 'csv_files'
-    #TAR_DATA_ROOT_DIRECTORY = 'data'
-    #TAR_FILE_NAME = 'raw_submission.tar.gz'
+class Cafa:
 
     def __init__(self):
+        self.data_root_directory = ''
+        self.zip_data_directory = ''
+        self.fmax_files_directory = ''
+        self.csv_output_files_directory = ''
         self.taxon_name = 'None'
         self.set_path_cafa_team_files(const.DATA_ROOT_DIRECTORY)
         self.set_path_zipped_files(const.TAR_DATA_ROOT_DIRECTORY)
         self.set_path_fmax_files(const.FMAX_FILES_DIRECTORY)
         self.set_path_csv_out(const.CSV_OUTPUT_DIRECTORY)
-
 
     def set_path_cafa_team_files(self, path):
         self.data_root_directory = path
@@ -68,7 +66,7 @@ class cafa:
         self.fmax_sum = {}
         self.total_num_fmax_scores = {}
         for o in const.ONTOLOGY_LIST:
-            print("Ontology inside tabulator: "+o)
+            #print("Ontology inside tabulator: "+o)
             file_name = self.fmax_files_directory + '/' + o.lower() + "_" + self.taxon_name + '_' + "type" + str(type) + '_' +\
                         'mode' + str(mode) + '_all_fmax_sheet.csv'
 
@@ -104,15 +102,15 @@ class cafa:
                             #print(str(i)+":"+team + " not found in author_list for taxonID: " + str(taxonID))
 
         # Debug Code
-        for o in const.ONTOLOGY_LIST:
-            print("Ontology: "+o)
-            print("RELATIVE FMAX")
-            print(self.keyword_relative_fmax_score[o])
-            print("FMAX")
-            print(self.keyword_fmax_score[o])
+        #for o in const.ONTOLOGY_LIST:
+            #print("Ontology: "+o)
+            #print("RELATIVE FMAX")
+            #print(self.keyword_relative_fmax_score[o])
+            #print("FMAX")
+            #print(self.keyword_fmax_score[o])
             sorted_fmax_rel = sorted(self.keyword_relative_fmax_score[o].items(), key=operator.itemgetter(1), reverse=True)
             #sorted_fmax = sorted(self.keyword_fmax_score[o], key=operator.itemgetter(2), reverse=True)
-            print("SORTED FMAX")
+            #print("SORTED FMAX")
             #print(sorted_fmax)
             #for item in sorted_fmax_rel:
                 #print("%s ---> %.2f" % ( item[0], item[1]))
@@ -232,3 +230,158 @@ class cafa:
                             raise KeyError(team + " not found in author_list for taxonID: " + str(taxonID))
 
                         writer.writerow(out_dict)
+
+
+    def create_taxonID_dictionary(self):
+        #self.taxonID_counts = {}
+        self.taxonID_counts = al.taxonID_counts(self.author_list).copy()
+
+    def create_taxonID_list(self):
+        self.taxonID_list = []
+
+        for taxonID in self.taxonID_counts.keys():
+            self.taxonID_list.append(taxonID)
+
+
+
+
+    def fmax_kwdscores_by_ontology_taxon_list(self, type, mode, **kwargs):
+
+        # Debug Code
+        print("KWARGS")
+        print(kwargs)
+
+        print(kwargs['ontologies'])
+        print(kwargs['bpo_taxons'])
+        print(kwargs['cco_taxons'])
+        print(kwargs['mfo_taxons'])
+
+        taxa = {'10116': 'RAT', '9606': 'HUMAN', '3702': 'ARATH', '7955': 'DANRE', '44689': 'DICDI',
+         '7227': 'DROME', '83333': 'ECOLI', '10090': 'MOUSE', '208963': 'PSEAE',
+         '237561': 'CANAX', '559292': 'YEAST', '284812': 'SCHPO', '8355': 'XENLA', '224308': 'BACSU',
+         '99287': 'SALTY', '243232': 'METJA', '321314': 'SALCH', '160488': 'PSEPK', '223283': 'PSESM',
+         '85962': 'HELPY', '243273': 'MYCGE', '170187': 'STRPN', '273057': 'SULSO', 'all': 'all',
+         'prokarya': 'prokarya', 'eukarya': 'eukarya'}
+
+        print("TAXA TABLE")
+        for k in taxa.keys():
+            #print(k)
+            #print (isinstance(k, str))
+            #print("taxa: ", taxon.taxon_name_converter('9606'))
+            print("taxa: " + k + "\tconverted: " + taxon.taxon_name_converter(k) + "\tunconverted back :" + taxon.taxon_ID_converter(taxon.taxon_name_converter(k)))
+
+        #taxon.taxon_name_converter()
+        # End Debug Code
+
+        # Create taxon list for each ontology using arguments from **kwargs
+        taxon_list = {}
+        for ontology in kwargs['ontologies']:
+            taxon_list[ontology] = kwargs[ontology.lower()+"_taxons"]
+
+        # Debug Code
+        print("\n\nnewly created taxon list")
+        for o in kwargs['ontologies']:
+            print(o)
+            print(taxon_list[o])
+        # End Debug Code
+
+        keyword_fmax_score_template = {
+            'sequence alignment': 0, 'sequence-profile alignment': 0, 'profile-profile alignment': 0,
+            'phylogeny': 0,'sequence properties': 0, 'physicochemical properties': 0, 'predicted properties': 0,
+            'protein interactions': 0, 'gene expression': 0, 'mass spectrometry': 0, 'genetic interactions': 0,
+            'protein structure': 0, 'literature': 0, 'genomic context': 0, 'synteny': 0, 'structure alignment': 0,
+            'comparative model': 0, 'predicted protein structure': 0, 'de novo prediction': 0, 'machine learning': 0,
+            'genome environment': 0, 'operon': 0, 'ortholog': 0, 'paralog': 0, 'homolog': 0, 'hidden Markov model': 0,
+            'clinical data': 0, 'genetic data': 0, 'natural language processing': 0, 'other functional information': 0}
+
+        self.create_taxonID_dictionary()
+        self.create_taxonID_list()
+
+        # Initialize the dictionaries keyword_relative_fmax_score and keyword_equal_wts_fmax_score
+        keyword_relative_fmax_score = {}
+        keyword_equal_wts_fmax_score = {}
+#        for o in const.ONTOLOGY_LIST:
+        for o in kwargs['ontologies']:
+            keyword_relative_fmax_score[o] = keyword_fmax_score_template.copy()
+            keyword_equal_wts_fmax_score[o] = keyword_fmax_score_template.copy()
+
+        # Add entry to keyword_relative_fmax_score and keyword_equal_wts_fmax_score which will be for ALL
+        # ontologies combined.
+        keyword_relative_fmax_score['ALL'] = keyword_fmax_score_template.copy()
+        keyword_equal_wts_fmax_score['ALL'] = keyword_fmax_score_template.copy()
+
+        fmax_sum_all_ontologies = 0
+        total_num_fmax_scores_all_ontologies = 0
+        fmax_sum = {}
+        total_num_fmax_scores = {}
+
+        #for o in const.ONTOLOGY_LIST:
+        for o in kwargs['ontologies']:
+
+            fmax_sum[o] = 0
+            total_num_fmax_scores[o] = 0
+
+            for taxon_name in taxon_list[o]:
+
+                #taxon_name = taxon.taxon_name_converter(taxonID)
+                file_name = self.fmax_files_directory + '/' + o.lower() + "_" + taxon_name + '_' + "type" + str(type) + '_' +\
+                            'mode' + str(mode) + '_all_fmax_sheet.csv'
+
+                with open(file_name, newline='') as csvfile:
+                    reader = csv.DictReader(csvfile)
+                    for i, row in enumerate(reader):
+                        if i > 1 and float(row['Coverage']) != 0.0:   # Skip if row is one of first 2 rows or coverage = 0
+                            fmax_sum[o] += float(row['F1-max'])
+                            total_num_fmax_scores[o] += 1
+                            fmax_sum_all_ontologies += float(row['F1-max'])
+                            total_num_fmax_scores_all_ontologies += 1
+
+        #for o in const.ONTOLOGY_LIST:
+        for o in kwargs['ontologies']:
+
+            for taxon_name in taxon_list:
+
+                with open(file_name, newline='') as csvfile:
+
+                    reader = csv.DictReader(csvfile)
+
+                    for i, row in enumerate(reader):
+                        if i > 1 and float(row['Coverage']) != 0.0:   # Skip if row is one of first 2 rows or coverage = 0
+                            team = row['ID-model'][:-2].lower()
+                            model = row['ID-model'][len(row['ID-model'])-1:]
+
+                            if team in self.author_list:
+                                if str(taxonID) in self.author_list[team]:
+                                    if model in self.author_list[team][str(taxonID)]:
+                                        for kwd in self.author_list[team][str(taxonID)][model]:
+                                            keyword_relative_fmax_score[o][kwd] += float(row['F1-max']) / fmax_sum[o]
+                                            keyword_equal_wts_fmax_score[o][kwd] += 1.0 / total_num_fmax_scores[o]
+                                            keyword_relative_fmax_score['ALL'][kwd] += float(row['F1-max']) / fmax_sum_all_ontologies
+                                            keyword_equal_wts_fmax_score['ALL'][kwd] += 1.0 / total_num_fmax_scores_all_ontologies
+
+                                    else:
+                                        raise KeyError("Model " + model + " not found in author_list for taxonID: " +
+                                                       str(taxonID) + " Author: " + team)
+                                else:
+                                    raise KeyError("TaxonID: " + str(taxonID) + "not found in author list for author: " + team)
+                            else:
+                                raise KeyError(team + " not found in author_list for taxonID: " + str(taxonID))
+                                #print(str(i)+":"+team + " not found in author_list for taxonID: " + str(taxonID))
+
+
+        # Debug Code
+        #for o in const.ONTOLOGY_LIST:
+            #print("Ontology: "+o)
+            #print("RELATIVE FMAX")
+            #print(self.keyword_relative_fmax_score[o])
+            #print("FMAX")
+            #print(self.keyword_fmax_score[o])
+            sorted_fmax_rel = sorted(self.keyword_relative_fmax_score[o].items(), key=operator.itemgetter(1), reverse=True)
+            #sorted_fmax = sorted(self.keyword_fmax_score[o], key=operator.itemgetter(2), reverse=True)
+            #print("SORTED FMAX")
+            #print(sorted_fmax)
+            #for item in sorted_fmax_rel:
+                #print("%s ---> %.2f" % ( item[0], item[1]))
+
+            #for item in sorted_fmax:
+            #    print(item, self.keyword_fmax_score[o][item])
