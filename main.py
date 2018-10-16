@@ -5,9 +5,17 @@ import taxon
 cobj = cafa.Cafa()
 
 cobj.create_author_kwd_taxon_dict()
-cobj.fmax_kwdscores_by_taxonID(1, 1, 9606)
+#cobj.fmax_kwdscores_by_taxonID(1, 1, 9606)
+cobj.fmax_kwdscores_by_taxon('BPO', taxonID=9606)
+cobj.plot_ontology_fmax_results('BPO', taxonID=9606)
+#cobj.csv_ontology_fmax_results('BPO', 1, 1, 9606)
 
-#cobj.plot_ontology_fmax_results('BPO')
+#cobj.fmax_kwdscores_by_taxon('CCO', taxonID=9606)
+#cobj.plot_ontology_fmax_results('CCO', taxonID=9606)
+
+#cobj.fmax_kwdscores_by_taxon('MFO', taxonID=9606)
+#cobj.plot_ontology_fmax_results('MFO', taxonID=9606)
+
 #cobj.plot_ontology_fmax_results('CCO')
 #cobj.plot_ontology_fmax_results('MFO')
 #cobj.csv_ontology_fmax_results(1, 1, 9606)
@@ -21,12 +29,12 @@ print(cobj.taxonID_counts)
 cobj.create_taxonID_list()
 print(cobj.taxonID_list)
 
-ontologies_list = ('BPO', 'CCO', 'MFO')
-bpo_taxons = ("ARATH", "BACSU", "CANAX", "DANRE", "DICDI", "DROME", "ECOLI", "eukarya", "HUMAN", "MOUSE", "prokarya", "RAT", "SCHPO")
-cco_taxons = ("ARATH", "CANAX", "DICDI", "DROME", "ECOLI", "eukarya", "HUMAN", "MOUSE", "prokarya", "RAT")
-mfo_taxons = ("ARATH", "BACSU", "DROME", "ECOLI", "eukarya", "HUMAN", "MOUSE", "prokarya", "RAT", "SALTY", "SCHPO")
+#ontologies_list = ('BPO', 'CCO', 'MFO')
+#bpo_taxons = ("ARATH", "BACSU", "CANAX", "DANRE", "DICDI", "DROME", "ECOLI", "eukarya", "HUMAN", "MOUSE", "prokarya", "RAT", "SCHPO")
+#cco_taxons = ("ARATH", "CANAX", "DICDI", "DROME", "ECOLI", "eukarya", "HUMAN", "MOUSE", "prokarya", "RAT")
+#mfo_taxons = ("ARATH", "BACSU", "DROME", "ECOLI", "eukarya", "HUMAN", "MOUSE", "prokarya", "RAT", "SALTY")
 
-cobj.fmax_kwdscores_by_ontology_taxon_list(1, 1, ontologies=ontologies_list, bpo_taxons = bpo_taxons, cco_taxons = cco_taxons, mfo_taxons=mfo_taxons)
+#cobj.fmax_kwdscores_by_ontology_taxon_list(1, 1, ontologies=ontologies_list, bpo_taxons = bpo_taxons, cco_taxons = cco_taxons, mfo_taxons=mfo_taxons)
 
 
 
