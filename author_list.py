@@ -27,7 +27,7 @@ def create_author_list(authors_list, file_list):
 
         author_in_file = curLine[len('AUTHOR '):].lower()
         author_in_file = author_in_file.strip()
-        author_inf_file = author_in_file.replace("\n", "")
+        author_in_file = author_in_file.replace("\n", "")
 
         # See if MODEL is in the second line. Extract Model # if so.
         curLine = fh.readline()
