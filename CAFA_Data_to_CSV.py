@@ -56,26 +56,35 @@ authorsList = {}
 fileCount = fl.create_file_list(fileList)
 filesProcessed = al.create_author_list(authorsList, fileList)
 
-cfg.create_keycount_csv(authorsList)
+#cfg.create_keycount_csv(authorsList)
+
+kc.count_kwds(authorsList)
+#kc.plot_raw_keyword_counts("none", kc.methodology_keyword_count, taxonID=9606)
+print(kc.model_methodology_keyword_count)
+kc.plot_raw_keyword_counts("none", kc.model_methodology_keyword_count['1'], taxonID=9606)
+kc.plot_raw_keyword_counts("none", kc.model_methodology_keyword_count['2'], taxonID=9606)
+kc.plot_raw_keyword_counts("none", kc.model_methodology_keyword_count['3'], taxonID=9606)
+print(kc.model_methodology_keyword_count)
+
 
 # Output data
-print("\n\n\nAUTHORS LIST DICTIONARY")
-print(authorsList)
-print("\nMETHODOLOGY KEYWORD COUNT DICTIONARY")
-print(kc.methodology_keyword_count)
-print("\nMODEL METHODOLOGY KEYWORD COUNT DICTIONARY")
-print(kc.model_methodology_keyword_count)
-print("\nNumber of files discovered:", fileCount)
-print("\nNumber of files processed", filesProcessed)
+#print("\n\n\nAUTHORS LIST DICTIONARY")
+#print(authorsList)
+#print("\nMETHODOLOGY KEYWORD COUNT DICTIONARY")
+#print(kc.methodology_keyword_count)
+#print("\nMODEL METHODOLOGY KEYWORD COUNT DICTIONARY")
+#print(kc.model_methodology_keyword_count)
+#print("\nNumber of files discovered:", fileCount)
+#print("\nNumber of files processed", filesProcessed)
 
 
 #results{}
 
 print("Before")
-for author in authorsList:
-    for taxonID in authorsList[author]:
-        if author == 'casadiobolognabiocomputinggroup' and taxonID == '9606':
-            print(author,taxonID, authorsList[author][taxonID].keys())
+#for author in authorsList:
+#    for taxonID in authorsList[author]:
+#        if author == 'casadiobolognabiocomputinggroup' and taxonID == '9606':
+#            print(author,taxonID, authorsList[author][taxonID].keys())
 #            print(author,taxonID, authorsList[author][taxonID])
 print("After")
 

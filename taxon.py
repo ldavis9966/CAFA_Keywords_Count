@@ -1,5 +1,5 @@
 
-def taxon_name_converter(taxonID):
+def taxon_id_to_name(taxonID):
     #convert from taxonomy ID to name (i.e. from 9606 to HUMAN）
     if isinstance(taxonID, int):
         taxonID = str(taxonID)
@@ -11,7 +11,7 @@ def taxon_name_converter(taxonID):
     '85962':'HELPY','243273':'MYCGE','170187':'STRPN','273057':'SULSO','all':'all','prokarya':'prokarya','eukarya':'eukarya'}
     return taxonTable[taxonID]
 
-def taxon_ID_converter(taxon_name):
+def taxon_name_to_id(taxon_name):
     #convert from taxonomy ID to name (i.e. from 9606 to HUMAN）
 
     taxonTable = {'RAT': '10116', 'HUMAN': '9606','ARATH': '3702', 'DANRE': '7955','DICDI': '44689',

@@ -1,5 +1,6 @@
 import sys
 
+# This is a work in progress and currently really functional
 def print(max_val, max_bar_val, cur_val):
 #    print.old_num_asts += 1
     bar = ""

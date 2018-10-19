@@ -1,8 +1,10 @@
-import cafa
+import cafa3
 import constant as const
 import taxon
+import keyword_counts
 
-cobj = cafa.Cafa()
+
+cobj = cafa3.Cafa3()
 
 cobj.create_author_kwd_taxon_dict()
 #cobj.fmax_kwdscores_by_taxonID(1, 1, 9606)
@@ -17,9 +19,9 @@ print(cobj.author_list)
 #cobj.plot_ontology_fmax_results('CCO', taxonName='all')
 #cobj.csv_ontology_fmax_results('CCO', 1, 1, 'all')
 
-cobj.fmax_kwdscores_by_taxon('MFO', taxonName='all')
-cobj.plot_ontology_fmax_results('MFO', taxonName='all')
-cobj.csv_ontology_fmax_results('MFO', 1, 1, 'all')
+#cobj.kwdscores_by_taxon('MFO', taxonName='all')
+#cobj.plot_ontology_score_results('MFO', taxonName='all')
+#cobj.csv_ontology_score_results('MFO', 1, 1, 'all')
 
 
 #cobj.fmax_kwdscores_by_taxon('BPO', taxonID=9606)

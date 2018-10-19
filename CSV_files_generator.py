@@ -6,16 +6,16 @@ import keyword_counts as kc
 # Creates two csv files. First csv file outputs all the authors' taxonIDs and models and shows the keywords used
 # The second csv file output the total keywords counts and the total keyword counts by model
 def create_keycount_csv(authors_list):
-    csvHeader = list(const.METHODOLOGY_KEYWORDS)
-    csvHeader.insert(0, "Team")
-    csvHeader.insert(1, "Taxon ID")
-    csvHeader.insert(2, "Model Number")
+    csv_header = list(const.METHODOLOGY_KEYWORDS)
+    csv_header.insert(0, "Team")
+    csv_header.insert(1, "Taxon ID")
+    csv_header.insert(2, "Model Number")
 
     kc.count_kwds(authors_list)
 
     # Create csv file of keywords used for each team's taxonID and model #
     with open(const.CSV_OUTPUT_DIRECTORY+'/team_model_taxonID_keyword.csv', 'w', newline='') as csvfile:
-        writer = csv.DictWriter(csvfile, fieldnames=csvHeader)
+        writer = csv.DictWriter(csvfile, fieldnames=csv_header)
         writer.writeheader()
         for author in authors_list:
             for taxonID in authors_list[author]:
@@ -27,18 +27,18 @@ def create_keycount_csv(authors_list):
                     writer.writerow(outline)  # end of 1st csv file creation
 
     # Create csv file for total keyword counts and total keywords count by model #
-    csvHeader = list(const.METHODOLOGY_KEYWORDS)
-    csvHeader.insert(0, "")
+    csv_header = list(const.METHODOLOGY_KEYWORDS)
+    csv_header.insert(0, "")
     with open(const.CSV_OUTPUT_DIRECTORY+'/total_keyword_counts.csv', 'w', newline='') as csvfile:
-        writer = csv.DictWriter(csvfile, fieldnames=csvHeader)
+        writer = csv.DictWriter(csvfile, fieldnames=csv_header)
         writer1 = csv.writer(csvfile, delimiter=' ', quotechar="", quoting=csv.QUOTE_NONE)
 
         writer1.writerow('Total_Keyword_Count')
         writer.writeheader()
         writer.writerow(kc.methodology_keyword_count)
 
-        csvHeader[0] = 'Model Number'
-        writer = csv.DictWriter(csvfile, fieldnames=csvHeader)
+        csv_header[0] = 'Model Number'
+        writer = csv.DictWriter(csvfile, fieldnames=csv_header)
         writer1.writerow('')
         writer1.writerow('Model_Keyword_Count')
         writer.writeheader()
