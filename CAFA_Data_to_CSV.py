@@ -58,14 +58,19 @@ filesProcessed = al.create_author_list(authorsList, fileList)
 
 #cfg.create_keycount_csv(authorsList)
 
-kc.count_kwds(authorsList)
+#kc.count_kwds(authorsList)
 #kc.plot_raw_keyword_counts("none", kc.methodology_keyword_count, taxonID=9606)
 print(kc.model_methodology_keyword_count)
-kc.plot_raw_keyword_counts("none", kc.model_methodology_keyword_count['1'], taxonID=9606)
-kc.plot_raw_keyword_counts("none", kc.model_methodology_keyword_count['2'], taxonID=9606)
-kc.plot_raw_keyword_counts("none", kc.model_methodology_keyword_count['3'], taxonID=9606)
+#kc.plot_raw_keyword_counts("none", kc.model_methodology_keyword_count['1'], taxonID=9606)
+#kc.plot_raw_keyword_counts("none", kc.model_methodology_keyword_count['2'], taxonID=9606)
+#kc.plot_raw_keyword_counts("none", kc.model_methodology_keyword_count['3'], taxonID=9606)
+key_cnts_for_model = kc.count_kwds(authorsList, '1')
+kc.plot_raw_keyword_counts(key_cnts_for_model, '1', 8, 6, 8, 8, 12, 5C89C4)
+key_cnts_for_model = kc.count_kwds(authorsList, '2')
+kc.plot_raw_keyword_counts(key_cnts_for_model, '2', 8, 6, 8, 8, 12, 5C89C4)
+key_cnts_for_model = kc.count_kwds(authorsList, '3')
+kc.plot_raw_keyword_counts(key_cnts_for_model, '3', 8, 6, 8, 8, 12, ff0000)
 print(kc.model_methodology_keyword_count)
-
 
 # Output data
 #print("\n\n\nAUTHORS LIST DICTIONARY")

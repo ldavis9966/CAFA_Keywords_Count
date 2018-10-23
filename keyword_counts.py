@@ -45,15 +45,16 @@ keyword_template = {
             'genome environment': 0, 'operon': 0, 'ortholog': 0, 'paralog': 0, 'homolog': 0, 'hidden Markov model': 0,
             'clinical data': 0, 'genetic data': 0, 'natural language processing': 0, 'other functional information': 0}
 
-model_methodology_keyword_count = {"1": {}, "2": {}, "3": {}}
+#model_methodology_keyword_count = {"1": {}, "2": {}, "3": {}}
 
 methodology_keyword_count = keyword_template.copy()
+model_methodology_keyword_count = {}
 
+def count_kwds(authors_list, model):
 
-def count_kwds(authors_list):
-
-    for model in ['1', '2', '3']:
-        model_methodology_keyword_count[model] = keyword_template.copy()
+#    for model in ['1', '2', '3']:
+#        model_methodology_keyword_count[model] = keyword_template.copy()
+    model_methodology_keyword_count = keyword_template.copy()
 
     #print(model_methodology_keyword_count['1'])
 
@@ -74,22 +75,27 @@ def count_kwds(authors_list):
     # 2. Determine overall total keyword count
     for author in authors_list:
         for taxonID in authors_list[author]:
-            for model in authors_list[author][taxonID]:
-                for kwrd in authors_list[author][taxonID][model]:
+            for mdl in authors_list[author][taxonID]:
+                for kwrd in authors_list[author][taxonID][mdl]:
                     # key_counts['Methodology Keyword Count'] += 1
                     methodology_keyword_count[kwrd] += 1
-                    model_methodology_keyword_count[model][kwrd] += 1
+#                    model_methodology_keyword_count[model][kwrd] += 1
+                    if mdl == model:
+                        model_methodology_keyword_count[kwrd] += 1
 
     print("AFTER CALC")
     #print(methodology_keyword_count)
     print(model_methodology_keyword_count)
 
-def plot_raw_keyword_counts(ontology, keyword_dict, **kwargs):
+    return model_methodology_keyword_count
+
+#def plot_raw_keyword_counts(ontology, keyword_dict, **kwargs):
+def plot_raw_keyword_counts(keyword_dict, model, width, height, x_font_size, y_font_size, label_font_size, hex_color):
 
 #        self.bnchmrk_type = 1
 #        self.bnchmrk_mode = 1
 
-    ontology = ontology.upper()
+#    ontology = ontology.upper()
 
 #        if 'type' in kwargs:
 #            self.bnchmrk_type = kwargs['type']
@@ -113,14 +119,19 @@ def plot_raw_keyword_counts(ontology, keyword_dict, **kwargs):
     else:
         raise Exception("'Either taxonName or taxonID needed as an argument.'")'''
 
-    plt.rc('xtick', labelsize=8)
+    #plt.rc('xtick', labelsize=8)
+    plt.rc('xtick', labelsize=x_font_size)
+    plt.rc('ytick', labelsize=y_font_size)
+    plt.rcParams.update({'font.size': label_font_size})
     # fig, ax = plt.subplots(figsize=(10,2))
     # fig = plt.figure(figsize=(10,6))
-    fig, ax = plt.subplots(figsize=(8, 6))
+    #fig, ax = plt.subplots(figsize=(8, 6))
+    fig, ax = plt.subplots(figsize=(width, height))
+
 #        fig.suptitle("Ontology: "+ontology+"   Taxon: "+ self.taxon_name, fontsize=14)
 #        fig.canvas.set_window_title("Ontology: " + ontology + "\tTaxon: " + self.taxon_name+"\tType: " +
 #                                    str(self.bnchmrk_type) + "\tMode: " + str(self.bnchmrk_mode))
-    fig.canvas.set_window_title("Raw Keyword Counts for All Models")
+    fig.canvas.set_window_title("Raw Keyword Counts Model " + model)
 
 # ax = fig.add_axes([.1, .25, .8, .7])
     # ax.set_title(ontology + " Cumulative Relative Fmax Scores by Keyword for " + self.taxon_name + " Taxon")
@@ -147,7 +158,8 @@ def plot_raw_keyword_counts(ontology, keyword_dict, **kwargs):
         #y2.append(self.keyword_relative_fmax_score[kwd])
     # plt.bar(x_index, y1, bar_width, color='#5C89C4', label="Relative FMax")
     # plt.bar(x_index+bar_width, y2, bar_width, color='#5DC687', label="FMax (Equally Weighted)")
-    plt.bar(x_index, y1, bar_width, color='#5C89C4', label="Equal Weights")
+    #plt.bar(x_index, y1, bar_width, color='#5C89C4', label="Equal Weights")
+    plt.bar(x_index, y1, bar_width, color='#'+hex_color, label="Equal Weights")
     #plt.bar(x_index+bar_width, y2, bar_width, color='#5DC687', label="Weighted by Fmax")
 
     index = np.arange(4)
