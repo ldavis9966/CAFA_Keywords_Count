@@ -1,11 +1,12 @@
 # import file_list as fl
 # import author_list as al
+import constant as const
 import taxon
+
 import csv
 import operator
 import matplotlib.pyplot as plt
 import numpy as np
-import constant as const
 import re
 import os
 
@@ -35,6 +36,7 @@ class Cafa3:
         # Taxon to be used for this instance. Note both name and ID must refer to the same taxon.
         self.taxon_name = 'None'  # Taxon name
         self.taxon_id = 0  # Taxon ID
+        self.ontology = 'MFO'  # Default ontology
 
         # Taxa information derived from Cafa3 raw submission file and stored in self.author_list
         self.taxon_id_list = []  # List of all taxa in self.author_list
@@ -74,310 +76,6 @@ class Cafa3:
 
     def set_path_csv_out(self, path):
         self.csv_output_files_directory = path
-
-    # Pre-condition:
-    # Must have called self set_path_cafa_team_files('path') to ste path to cafa team files
-    def create_author_kwd_taxon_dict(self):
-        author_file_list = {}
-        self.author_list = {}
-        Cafa3.create_file_list(author_file_list)
-        Cafa3.create_author_list(self.author_list, author_file_list)
-
-    # Required argument
-    # ontology - Must be either BPO, MFO, or CCO
-    #
-    # Optional arguments:
-    # type - Either type 1 or 2. If not set the class default is 1
-    # mode - Either mode 1 or 2.
-    #
-    #
-    # Pre-condition:
-    # 1. Must have called create_author_kwd_taxon_dict() to create the author dictionary
-    # 2. Must have called set_path_fmax_files
-    def kwdscores_by_taxon(self, ontology, **kwargs):
-
-        ontology = ontology.upper()
-
-        # Set keywords scores dictionaries to zero for all keywords
-        self.keyword_relative_fmax_score = self.keyword_template.copy()
-        self.keyword_equal_wts_score = self.keyword_template.copy()
-        self.fmax_sum = 0
-        self.total_num_fmax_scores = 0
-
-        # Default is type 1 mode 1.
-        self.bnchmrk_type = 1
-        self.bnchmrk_mode = 1
-
-        if 'type' in kwargs:
-            if kwargs['type'] != 1 and kwargs['type'] != 2:
-                raise Exception("Invalid benchmark type given. Expect either 1 or 2.")
-            self.bnchmrk_type = kwargs['type']
-        if'mode' in kwargs:
-            if kwargs['mode'] != 1 and kwargs['type'] != 2:
-                raise Exception("Invalid benchmark mode given. Expect either 1 or 2.")
-            self.bnchmrk_mode = kwargs['mode']
-
-        # Get either taxonName or taxon_id from argument list
-        if'taxonName' in kwargs and 'taxonID' in kwargs:
-            print("Both taxonName and taxonID provided as arguments, only one is needed. Ignoring taxonID and using" +
-                  " taxonName")
-            self.taxon_name = kwargs['taxonName']
-            self.taxon_id = taxon.taxon_name_to_id(self.taxon_name)
-        elif 'taxonName' in kwargs:
-            self.taxon_name = kwargs['taxonName']
-            self.taxon_id = taxon.taxon_name_to_id(self.taxon_name)
-        elif 'taxonID' in kwargs:
-            self.taxon_name = taxon.taxon_id_to_name(kwargs['taxonID'])
-            self.taxon_id = kwargs['taxonID']
-        else:
-            raise Exception("'Either taxonName or taxonID needed as an argument.'")
-
-        # taxon_id = taxon.taxon_ID_converter(self.taxon_name)
-
-        # print("Ontology inside tabulator: "+o)
-#        if ontology.lower == 'all':
-#            file_name = self.fmax_files_directory + '/' + ontology.lower() + "_all_type" + str(bnchmrk_type) + '_' +\
-#                    'mode' + str(bnchmrk_mode) + '_all_fmax_sheet.csv'
-#        else:
-#        file_name = self.fmax_files_directory + '/' + ontology.lower() + "_" + self.taxon_name + '_' + "type" +\
-#            str(self.bnchmrk_type) + '_' + 'mode' + str(self.bnchmrk_mode) + '_all_fmax_sheet.csv'
-
-        # For Linux path
-        file_name = self.fmax_files_directory + '/' + ontology.lower() + "_" + self.taxon_name + '_' + "type" +\
-            str(self.bnchmrk_type) + '_' + 'mode' + str(self.bnchmrk_mode) + '_all_fmax_sheet.csv'
-
-        # For Windows 10 path
-        # file_name = self.fmax_files_directory + '\\' + ontology.lower() + "_" + self.taxon_name + '_' + "type" +\
-        #    str(self.bnchmrk_type) + '_' + 'mode' + str(self.bnchmrk_mode) + '_all_fmax_sheet.csv'
-
-
-        with open(file_name, newline='') as csvfile:
-            reader = csv.DictReader(csvfile)
-            for i, row in enumerate(reader):
-                if i > 1 and float(row['Coverage']) != 0.0:   # Skip if row is one of first 2 rows or coverage = 0
-                    self.fmax_sum += float(row['F1-max'])
-                    self.total_num_fmax_scores += 1
-
-        with open(file_name, newline='') as csvfile:
-            reader = csv.DictReader(csvfile)
-            for i, row in enumerate(reader):
-                if i > 1 and float(row['Coverage']) != 0.0:   # Skip if row is one of first 2 rows or coverage = 0
-                    team = row['ID-model'][:-2].lower()
-                    model = row['ID-model'][len(row['ID-model'])-1:]
-
-                    if self.taxon_name == 'all':
-                        # print("A \'"+self.taxon_name+"\'")
-                        if team in self.author_list:
-                            for taxon_id in self.author_list[team]:
-                                # print("Author: "+team+"\ttaxon_id: "+taxon_id)
-                                # for i, key in enumerate(self.author_list[team][str(taxon_id)]):
-                                    # print("Key "+str(i)+" : "+key)
-
-                                if model in self.author_list[team][str(taxon_id)]:
-                                    for kwd in self.author_list[team][str(taxon_id)][model]:
-                                        self.keyword_relative_fmax_score[kwd] += float(row['F1-max'])/self.fmax_sum
-                                        self.keyword_equal_wts_score[kwd] += 1.0/self.total_num_fmax_scores
-                        else:
-                            raise KeyError(team + " not found in author_list for taxonID: " + str(taxon_id))
-
-                    else:
-                        # print("B \'"+self.taxonName+"\'")
-                        if team in self.author_list:
-                            if str(self.taxon_id) in self.author_list[team]:
-                                if model in self.author_list[team][str(self.taxon_id)]:
-                                    for kwd in self.author_list[team][str(self.taxon_id)][model]:
-                                        self.keyword_relative_fmax_score[kwd] += float(row['F1-max'])/self.fmax_sum
-                                        self.keyword_equal_wts_score[kwd] += 1.0/self.total_num_fmax_scores
-                                else:
-                                    raise KeyError("Model " + model + " not found in author_list for taxonID: " +
-                                                   str(self.taxon_id) + " Author: " + team)
-                            else:
-                                raise KeyError("TaxonID: " + str(self.taxon_id) + "not found in author list for author: "
-                                               + team)
-                        else:
-                            raise KeyError(team + " not found in author_list for taxonID: " + str(self.taxon_id))
-                        # print(str(i)+":"+team + " not found in author_list for taxonID: " + str(taxon_id))
-
-    ''' Plots the relative frequency and the raw counts weighted by fmax   
-    '''
-    def plot_ontology_score_results(self, ontology, **kwargs):
-
-        self.bnchmrk_type = 1
-        self.bnchmrk_mode = 1
-
-        ontology = ontology.upper()
-
-        if 'type' in kwargs:
-            self.bnchmrk_type = kwargs['type']
-        if'mode' in kwargs:
-            self.bnchmrk_mode = kwargs['mode']
-
-#        if('taxonName' not in kwargs and 'taxonID' not in kwargs):
-#            raise KeyError("Required argument missing. Need either taxonName or taxonID")
-        # Get either taxonName or taxonID from argument list
-        if 'taxonName' in kwargs and 'taxonID' in kwargs:
-            print("Both taxonName and taxonID provided as arguments, only one is needed. Ignoring taxonID and " +
-                  "using taxonName")
-            self.taxon_name = kwargs['taxonName']
-            self.taxon_id = taxon.taxon_name_to_id(self.taxon_name)
-        elif 'taxonName' in kwargs:
-            self.taxon_name = kwargs['taxonName']
-            self.taxon_id = taxon.taxon_name_to_id(self.taxon_name)
-        elif 'taxonID' in kwargs:
-            self.taxon_name = taxon.taxon_id_to_name(kwargs['taxonID'])
-            self.taxon_id = kwargs['taxonID']
-        else:
-            raise Exception("'Either taxonName or taxonID needed as an argument.'")
-
-        plt.rc('xtick', labelsize=8)
-        # fig, ax = plt.subplots(figsize=(10,2))
-        # fig = plt.figure(figsize=(10,6))
-        fig, ax = plt.subplots(figsize=(8, 6))
-#        fig.suptitle("Ontology: "+ontology+"   Taxon: "+ self.taxon_name, fontsize=14)
-        fig.canvas.set_window_title("Ontology: " + ontology + "\tTaxon: " + self.taxon_name+"\tType: " +
-                                    str(self.bnchmrk_type) + "\tMode: " + str(self.bnchmrk_mode))
-
-        # ax = fig.add_axes([.1, .25, .8, .7])
-        # ax.set_title(ontology + " Cumulative Relative Fmax Scores by Keyword for " + self.taxon_name + " Taxon")
-        ax.set_ylabel("Relative Frequency")
-        ax.set_xlabel("Keyword")
-
-        bar_width = 0.4
-
-        x_index = np.arange(0, len(self.keyword_relative_fmax_score))
-
-        # Sorts the keywords of the Dictionary, self.keyword_relative_fmax_score, by the values of its keywords
-        print("KEYWORD RELATIVE FMAX SCORE FOR ONTOLOGY "+ontology)
-        print(self.keyword_relative_fmax_score)
-        # sorted_fmax_rel = sorted(self.keyword_relative_fmax_score[ontology].items(), key=operator.itemgetter(1),
-        #  reverse=True)
-        sorted_scores = sorted(self.keyword_equal_wts_score.items(), key=operator.itemgetter(1), reverse=True)
-        x_ticks = []  # range(0,len(sorted_fmax_rel))
-        y1 = []
-        y2 = []
-        for kwd, val in sorted_scores:
-            x_ticks.append(kwd)
-            y1.append(val)
-            y2.append(self.keyword_relative_fmax_score[kwd])
-        # plt.bar(x_index, y1, bar_width, color='#5C89C4', label="Relative FMax")
-        # plt.bar(x_index+bar_width, y2, bar_width, color='#5DC687', label="FMax (Equally Weighted)")
-        plt.bar(x_index, y1, bar_width, color='#5C89C4', label="Equal Weights")
-        plt.bar(x_index+bar_width, y2, bar_width, color='#5DC687', label="Weighted by Fmax")
-
-        index = np.arange(4)
-        print(index)
-
-        plt.legend()
-        plt.xticks(x_index+bar_width/2, x_ticks)
-        plt.xticks(rotation=90)
-        plt.tight_layout()
-        plt.show()
-        print(x_index)
-        print(x_index+bar_width)
-
-    ''' Precondition: Must have called self.fmax_kwdscores_by_taxonID() first.
-    '''
-    def csv_ontology_score_results(self, ontology, bnchmrk_type, bnchmrk_mode, **kwargs):
-
-        # Create CVS Header
-        csv_header = list(const.METHODOLOGY_KEYWORDS)
-        csv_header.insert(0, "Team")
-        csv_header.insert(1, "Taxon ID")
-        csv_header.insert(2, "Model Number")
-        csv_header.insert(3, "Fmax in "+ontology+"_"+"t"+str(bnchmrk_type)+"_m"+str(bnchmrk_mode))
-        csv_header.insert(4, "Equal weights")
-        csv_header.insert(5, "Relative Fmax")
-
-        # Create csv input and output file names
-
-        file_name = self.fmax_files_directory + '/' + ontology.lower() + "_" + self.taxon_name + '_' + "type" + \
-            str(bnchmrk_type) + '_' + 'mode' + str(bnchmrk_mode) + '_all_fmax_sheet.csv'
-
-        output_file_name = self.csv_output_files_directory + '/' + ontology.lower() + "_" + self.taxon_name + "_type"\
-            + str(bnchmrk_type) + '_' + 'mode' + str(bnchmrk_mode) + '_all_fmax_sheet_with_weights.csv'
-
-        # open both input and output csv file
-        with open(file_name, newline='') as csvfile_in, open(output_file_name, 'w', newline='') as csvfile_out:
-
-            reader = csv.DictReader(csvfile_in)
-            writer = csv.DictWriter(csvfile_out, fieldnames=csv_header)
-
-            writer.writeheader()
-
-            # Loop through each row in the input file and calculate the weights (equal and by fmax) then out
-            # it to the new file.
-            out_dict = {}
-            for i, row in enumerate(reader):
-                if i > 1 and float(row['Coverage']) != 0.0:   # Skip if row is one of first 2 rows or coverage = 0
-
-                    team = row['ID-model'][:-2].lower()
-                    model = row['ID-model'][len(row['ID-model'])-1:]
-                    fmax = row['F1-max']
-
-                    out_dict.clear()
-                    if self.taxon_name.lower() == 'all':
-                        print("C \'" + self.taxon_name + "\'")
-
-                        if team in self.author_list:
-                            for taxon_id in self.author_list[team]:
-                                if model in self.author_list[team][str(taxon_id)]:
-
-                                    out_dict.clear()
-                                    out_dict['Team'] = team
-                                    out_dict['Taxon ID'] = taxon_id
-                                    out_dict['Model Number'] = model
-                                    out_dict["Fmax in " + ontology + "_" + "t" + str(bnchmrk_type) + "_m" +
-                                             str(bnchmrk_mode)] = fmax
-                                    out_dict["Equal weights"] = 1.0 / self.total_num_fmax_scores
-                                    out_dict['Relative Fmax'] = float(fmax) / self.fmax_sum
-
-                                    for kwd in self.author_list[team][str(taxon_id)][model]:
-                                        out_dict[kwd] = 1
-                        else:
-                            raise KeyError(team + " not found in author_list for taxonID: " + str(taxon_id))
-
-                    else:
-#                        print("D \'" + self.taxon_name + "\'")
-#                        print("THIS IS MY AUTHOR LIST")
-#                        print(self.author_list)
-#                        print("Author TAXON")
-#                        print(self.author_list[team][str(self.taxon_id)])
-
-                        if team in self.author_list:
-                            if str(self.taxon_id) in self.author_list[team]:
-                                if model in self.author_list[team][str(self.taxon_id)]:
-
-                                    out_dict.clear()
-                                    out_dict['Team'] = team
-                                    out_dict['Taxon ID'] = str(self.taxon_id)
-                                    out_dict['Model Number'] = model
-                                    out_dict["Fmax in " + ontology + "_" + "t" + str(bnchmrk_type) + "_m" +
-                                             str(bnchmrk_mode)] = fmax
-                                    out_dict["Equal weights"] = 1.0 / self.total_num_fmax_scores
-                                    out_dict['Relative Fmax'] = float(fmax) / self.fmax_sum
-
-                                    for kwd in self.author_list[team][str(self.taxon_id)][model]:
-                                        out_dict[kwd] = 1
-                                else:
-                                    raise KeyError("Model " + model + " not found in author_list for taxonID: " +
-                                                   str(taxon_id) + " Author: " + team)
-                            else:
-                                raise KeyError("TaxonID: " + str(self.taxon_id) + " not found in author list "
-                                                                                  "for author: " + team)
-                        else:
-                            raise KeyError(team + " not found in author_list for taxonID: " + str(taxon_id))
-
-                    writer.writerow(out_dict)
-
-    def create_taxon_id_dictionary(self):
-        # self.taxon_id_counts = {}
-        self.taxon_id_counts = Cafa3.get_taxon_id_counts(self.author_list).copy()
-
-    def create_taxon_id_list(self):
-        self.taxon_id_list = []
-
-        for taxon_id in self.taxon_id_counts.keys():
-            self.taxon_id_list.append(taxon_id)
 
     @staticmethod
     def create_author_list(authors_list, file_list):
@@ -561,6 +259,325 @@ class Cafa3:
 
         return file_count
 
+    # Pre-condition:
+    # Must have called self set_path_cafa_team_files('path') to ste path to cafa team files
+    def create_author_kwd_taxon_dict(self):
+        author_file_list = {}
+        self.author_list = {}
+        Cafa3.create_file_list(author_file_list)
+        Cafa3.create_author_list(self.author_list, author_file_list)
+
+    # Required argument
+    # ontology - Must be either BPO, MFO, or CCO
+    #
+    # Optional arguments:
+    # type - Either type 1 or 2. If not set the class default is 1
+    # mode - Either mode 1 or 2.
+    #
+    #
+    # Pre-condition:
+    # 1. Must have called create_author_kwd_taxon_dict() to create the author dictionary
+    # 2. Must have called set_path_fmax_files
+    def kwdscores_by_taxon(self, ontology, **kwargs):
+
+        ontology = ontology.upper()
+        self.ontology = ontology
+
+        # Set keywords scores dictionaries to zero for all keywords
+        self.keyword_relative_fmax_score = self.keyword_template.copy()
+        self.keyword_equal_wts_score = self.keyword_template.copy()
+        self.fmax_sum = 0
+        self.total_num_fmax_scores = 0
+
+        # Default is type 1 mode 1.
+        self.bnchmrk_type = 1
+        self.bnchmrk_mode = 1
+
+        if 'type' in kwargs:
+            if kwargs['type'] != 1 and kwargs['type'] != 2:
+                raise Exception("Invalid benchmark type given. Expect either 1 or 2.")
+            self.bnchmrk_type = kwargs['type']
+        if'mode' in kwargs:
+            if kwargs['mode'] != 1 and kwargs['type'] != 2:
+                raise Exception("Invalid benchmark mode given. Expect either 1 or 2.")
+            self.bnchmrk_mode = kwargs['mode']
+
+        # Get either taxonName or taxon_id from argument list
+        if'taxonName' in kwargs and 'taxonID' in kwargs:
+            print("Both taxonName and taxonID provided as arguments, only one is needed. Ignoring taxonID and using" +
+                  " taxonName")
+            self.taxon_name = kwargs['taxonName']
+            self.taxon_id = taxon.taxon_name_to_id(self.taxon_name)
+        elif 'taxonName' in kwargs:
+            self.taxon_name = kwargs['taxonName']
+            self.taxon_id = taxon.taxon_name_to_id(self.taxon_name)
+        elif 'taxonID' in kwargs:
+            self.taxon_name = taxon.taxon_id_to_name(kwargs['taxonID'])
+            self.taxon_id = kwargs['taxonID']
+        else:
+            raise Exception("'Either taxonName or taxonID needed as an argument.'")
+
+        # taxon_id = taxon.taxon_ID_converter(self.taxon_name)
+
+        # print("Ontology inside tabulator: "+o)
+#        if ontology.lower == 'all':
+#            file_name = self.fmax_files_directory + '/' + ontology.lower() + "_all_type" + str(bnchmrk_type) + '_' +\
+#                    'mode' + str(bnchmrk_mode) + '_all_fmax_sheet.csv'
+#        else:
+#        file_name = self.fmax_files_directory + '/' + ontology.lower() + "_" + self.taxon_name + '_' + "type" +\
+#            str(self.bnchmrk_type) + '_' + 'mode' + str(self.bnchmrk_mode) + '_all_fmax_sheet.csv'
+
+        # For Linux path
+        file_name = self.fmax_files_directory + '/' + ontology.lower() + "_" + self.taxon_name + '_' + "type" +\
+            str(self.bnchmrk_type) + '_' + 'mode' + str(self.bnchmrk_mode) + '_all_fmax_sheet.csv'
+
+        # For Windows 10 path
+        # file_name = self.fmax_files_directory + '\\' + ontology.lower() + "_" + self.taxon_name + '_' + "type" +\
+        #    str(self.bnchmrk_type) + '_' + 'mode' + str(self.bnchmrk_mode) + '_all_fmax_sheet.csv'
+
+
+        with open(file_name, newline='') as csvfile:
+            reader = csv.DictReader(csvfile)
+            for i, row in enumerate(reader):
+                if i > 1 and float(row['Coverage']) != 0.0:   # Skip if row is one of first 2 rows or coverage = 0
+                    self.fmax_sum += float(row['F1-max'])
+                    self.total_num_fmax_scores += 1
+
+        with open(file_name, newline='') as csvfile:
+            reader = csv.DictReader(csvfile)
+            for i, row in enumerate(reader):
+                if i > 1 and float(row['Coverage']) != 0.0:   # Skip if row is one of first 2 rows or coverage = 0
+                    team = row['ID-model'][:-2].lower()
+                    model = row['ID-model'][len(row['ID-model'])-1:]
+
+                    if self.taxon_name == 'all':
+                        # print("A \'"+self.taxon_name+"\'")
+                        if team in self.author_list:
+                            for taxon_id in self.author_list[team]:
+                                # print("Author: "+team+"\ttaxon_id: "+taxon_id)
+                                # for i, key in enumerate(self.author_list[team][str(taxon_id)]):
+                                    # print("Key "+str(i)+" : "+key)
+
+                                if model in self.author_list[team][str(taxon_id)]:
+                                    for kwd in self.author_list[team][str(taxon_id)][model]:
+                                        self.keyword_relative_fmax_score[kwd] += float(row['F1-max'])/self.fmax_sum
+                                        self.keyword_equal_wts_score[kwd] += 1.0/self.total_num_fmax_scores
+                        else:
+                            raise KeyError(team + " not found in author_list for taxonID: " + str(taxon_id))
+
+                    else:
+                        # print("B \'"+self.taxonName+"\'")
+                        if team in self.author_list:
+                            if str(self.taxon_id) in self.author_list[team]:
+                                if model in self.author_list[team][str(self.taxon_id)]:
+                                    for kwd in self.author_list[team][str(self.taxon_id)][model]:
+                                        self.keyword_relative_fmax_score[kwd] += float(row['F1-max'])/self.fmax_sum
+                                        self.keyword_equal_wts_score[kwd] += 1.0/self.total_num_fmax_scores
+                                else:
+                                    raise KeyError("Model " + model + " not found in author_list for taxonID: " +
+                                                   str(self.taxon_id) + " Author: " + team)
+                            else:
+                                raise KeyError("TaxonID: " + str(self.taxon_id) + "not found in author list for author: "
+                                               + team)
+                        else:
+                            raise KeyError(team + " not found in author_list for taxonID: " + str(self.taxon_id))
+                        # print(str(i)+":"+team + " not found in author_list for taxonID: " + str(taxon_id))
+
+    ''' Plots the relative frequency and the raw counts weighted by fmax   
+    '''
+#    def plot_ontology_score_results(self, ontology, **kwargs):
+    def plot_ontology_score_results(self, width, height, x_font_size, y_font_size, label_font_size, bar1_hex_color, bar2_hex_color):
+
+#        self.bnchmrk_type = 1
+#        self.bnchmrk_mode = 1
+
+        ontology = self.ontology.upper()
+
+#        if 'type' in kwargs:
+#            self.bnchmrk_type = kwargs['type']
+#        if'mode' in kwargs:
+#            self.bnchmrk_mode = kwargs['mode']
+
+        print("Mode: "+str(self.bnchmrk_mode))
+        print("Type: "+str(self.bnchmrk_type))
+
+#        if('taxonName' not in kwargs and 'taxonID' not in kwargs):
+#            raise KeyError("Required argument missing. Need either taxonName or taxonID")
+        # Get either taxonName or taxonID from argument list
+#        if 'taxonName' in kwargs and 'taxonID' in kwargs:
+#            print("Both taxonName and taxonID provided as arguments, only one is needed. Ignoring taxonID and " +
+#                  "using taxonName")
+#            self.taxon_name = kwargs['taxonName']
+#            self.taxon_id = taxon.taxon_name_to_id(self.taxon_name)
+#        elif 'taxonName' in kwargs:
+#            self.taxon_name = kwargs['taxonName']
+#            self.taxon_id = taxon.taxon_name_to_id(self.taxon_name)
+#        elif 'taxonID' in kwargs:
+#            self.taxon_name = taxon.taxon_id_to_name(kwargs['taxonID'])
+#            self.taxon_id = kwargs['taxonID']
+#        else:
+#            raise Exception("'Either taxonName or taxonID needed as an argument.'")
+
+        plt.rc('xtick', labelsize=x_font_size)
+        plt.rc('ytick', labelsize=y_font_size)
+        plt.rcParams.update({'font.size': label_font_size})
+
+        plt.rc('xtick', labelsize=8)
+        # fig, ax = plt.subplots(figsize=(10,2))
+        # fig = plt.figure(figsize=(10,6))
+        # fig, ax = plt.subplots(figsize=(8, 6))
+        fig, ax = plt.subplots(figsize=(width, height))
+#        fig.suptitle("Ontology: "+ontology+"   Taxon: "+ self.taxon_name, fontsize=14)
+        fig.canvas.set_window_title("Ontology: " + ontology + "\tTaxon: " + self.taxon_name+"\tType: " +
+                                    str(self.bnchmrk_type) + "\tMode: " + str(self.bnchmrk_mode))
+
+        # ax = fig.add_axes([.1, .25, .8, .7])
+        # ax.set_title(ontology + " Cumulative Relative Fmax Scores by Keyword for " + self.taxon_name + " Taxon")
+        ax.set_ylabel("Relative Frequency")
+        ax.set_xlabel("Keyword")
+
+        bar_width = 0.4
+
+        x_index = np.arange(0, len(self.keyword_relative_fmax_score))
+
+        # Sorts the keywords of the Dictionary, self.keyword_relative_fmax_score, by the values of its keywords
+        print("KEYWORD RELATIVE FMAX SCORE FOR ONTOLOGY "+ontology)
+        print(self.keyword_relative_fmax_score)
+        # sorted_fmax_rel = sorted(self.keyword_relative_fmax_score[ontology].items(), key=operator.itemgetter(1),
+        #  reverse=True)
+        sorted_scores = sorted(self.keyword_equal_wts_score.items(), key=operator.itemgetter(1), reverse=True)
+        x_ticks = []  # range(0,len(sorted_fmax_rel))
+        y1 = []
+        y2 = []
+        for kwd, val in sorted_scores:
+            x_ticks.append(kwd)
+            y1.append(val)
+            y2.append(self.keyword_relative_fmax_score[kwd])
+        # plt.bar(x_index, y1, bar_width, color='#5C89C4', label="Relative FMax")
+        # plt.bar(x_index+bar_width, y2, bar_width, color='#5DC687', label="FMax (Equally Weighted)")
+        # plt.bar(x_index, y1, bar_width, color='#5C89C4', label="Equal Weights")
+        # plt.bar(x_index+bar_width, y2, bar_width, color='#5DC687', label="Weighted by Fmax")
+        plt.bar(x_index, y1, bar_width, color='#'+bar1_hex_color, label="Equal Weights")
+        plt.bar(x_index+bar_width, y2, bar_width, color='#'+bar2_hex_color, label="Weighted by Fmax")
+
+        index = np.arange(4)
+        print(index)
+
+        plt.legend()
+        plt.xticks(x_index+bar_width/2, x_ticks)
+        plt.xticks(rotation=90)
+        plt.tight_layout()
+        plt.show()
+        print(x_index)
+        print(x_index+bar_width)
+
+    ''' Precondition: Must have called self.fmax_kwdscores_by_taxonID() first.
+    '''
+    def csv_ontology_score_results(self):
+
+        # Create CVS Header
+        csv_header = list(const.METHODOLOGY_KEYWORDS)
+        csv_header.insert(0, "Team")
+        csv_header.insert(1, "Taxon ID")
+        csv_header.insert(2, "Model Number")
+        csv_header.insert(3, "Fmax in "+self.ontology+"_"+"t"+str(self.bnchmrk_type)+"_m"+str(self.bnchmrk_mode))
+        csv_header.insert(4, "Equal weights")
+        csv_header.insert(5, "Relative Fmax")
+
+        # Create csv input and output file names
+
+        file_name = self.fmax_files_directory + '/' + self.ontology.lower() + "_" + self.taxon_name + '_' + "type" + \
+            str(self.bnchmrk_type) + '_' + 'mode' + str(self.bnchmrk_mode) + '_all_fmax_sheet.csv'
+
+        output_file_name = self.csv_output_files_directory + '/' + self.ontology.lower() + "_" + self.taxon_name + "_type"\
+            + str(self.bnchmrk_type) + '_' + 'mode' + str(self.bnchmrk_mode) + '_all_fmax_sheet_with_weights.csv'
+
+        # open both input and output csv file
+        with open(file_name, newline='') as csvfile_in, open(output_file_name, 'w', newline='') as csvfile_out:
+
+            reader = csv.DictReader(csvfile_in)
+            writer = csv.DictWriter(csvfile_out, fieldnames=csv_header)
+
+            writer.writeheader()
+
+            # Loop through each row in the input file and calculate the weights (equal and by fmax) then out
+            # it to the new file.
+            out_dict = {}
+            for i, row in enumerate(reader):
+                if i > 1 and float(row['Coverage']) != 0.0:   # Skip if row is one of first 2 rows or coverage = 0
+
+                    team = row['ID-model'][:-2].lower()
+                    model = row['ID-model'][len(row['ID-model'])-1:]
+                    fmax = row['F1-max']
+
+                    out_dict.clear()
+                    if self.taxon_name.lower() == 'all':
+                        print("C \'" + self.taxon_name + "\'")
+
+                        if team in self.author_list:
+                            for taxon_id in self.author_list[team]:
+                                if model in self.author_list[team][str(taxon_id)]:
+
+                                    out_dict.clear()
+                                    out_dict['Team'] = team
+                                    out_dict['Taxon ID'] = taxon_id
+                                    out_dict['Model Number'] = model
+                                    out_dict["Fmax in " + self.ontology + "_" + "t" + str(self.bnchmrk_type) + "_m" +
+                                             str(self.bnchmrk_mode)] = fmax
+                                    out_dict["Equal weights"] = 1.0 / self.total_num_fmax_scores
+                                    out_dict['Relative Fmax'] = float(fmax) / self.fmax_sum
+
+                                    for kwd in self.author_list[team][str(taxon_id)][model]:
+                                        out_dict[kwd] = 1
+
+                                    writer.writerow(out_dict)
+                        else:
+                            raise KeyError(team + " not found in author_list for taxonID: " + str(taxon_id))
+
+                    else:
+#                        print("D \'" + self.taxon_name + "\'")
+#                        print("THIS IS MY AUTHOR LIST")
+#                        print(self.author_list)
+#                        print("Author TAXON")
+#                        print(self.author_list[team][str(self.taxon_id)])
+
+                        if team in self.author_list:
+                            if str(self.taxon_id) in self.author_list[team]:
+                                if model in self.author_list[team][str(self.taxon_id)]:
+
+                                    out_dict.clear()
+                                    out_dict['Team'] = team
+                                    out_dict['Taxon ID'] = str(self.taxon_id)
+                                    out_dict['Model Number'] = model
+                                    out_dict["Fmax in " + self.ontology + "_" + "t" + str(self.bnchmrk_type) + "_m" +
+                                             str(self.bnchmrk_mode)] = fmax
+                                    out_dict["Equal weights"] = 1.0 / self.total_num_fmax_scores
+                                    out_dict['Relative Fmax'] = float(fmax) / self.fmax_sum
+
+                                    for kwd in self.author_list[team][str(self.taxon_id)][model]:
+                                        out_dict[kwd] = 1
+
+                                    writer.writerow(out_dict)
+                                else:
+                                    raise KeyError("Model " + model + " not found in author_list for taxonID: " +
+                                                   str(taxon_id) + " Author: " + team)
+                            else:
+                                raise KeyError("TaxonID: " + str(self.taxon_id) + " not found in author list "
+                                                                                  "for author: " + team)
+                        else:
+                            raise KeyError(team + " not found in author_list for taxonID: " + str(taxon_id))
+
+
+    def create_taxon_id_dictionary(self):
+        # self.taxon_id_counts = {}
+        self.taxon_id_counts = Cafa3.get_taxon_id_counts(self.author_list).copy()
+
+    def create_taxon_id_list(self):
+        self.taxon_id_list = []
+
+        for taxon_id in self.taxon_id_counts.keys():
+            self.taxon_id_list.append(taxon_id)
+
     def count_kwds(self, model):
         self.model = model
         self.total_keyword_count = self.keyword_template.copy()
@@ -581,9 +598,9 @@ class Cafa3:
                         if mdl == model:
                             self.model_keyword_count[kwrd] += 1
 
-        print("AFTER CALC")
-        #print(methodology_keyword_count)
-        print(self.model_keyword_count)
+        # print("AFTER CALC")
+        # print(methodology_keyword_count)
+        # print(self.model_keyword_count)
 
     def plot_raw_keyword_counts(self, width, height, x_font_size, y_font_size, label_font_size, bar_hex_color):
         plt.rc('xtick', labelsize=x_font_size)

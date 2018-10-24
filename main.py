@@ -2,6 +2,7 @@ import cafa3
 import constant as const
 import taxon
 #import keyword_counts
+import argparse
 
 
 cobj = cafa3.Cafa3()
@@ -9,8 +10,20 @@ cobj = cafa3.Cafa3()
 #cobj.create_author_kwd_taxon_dict()
 #cobj.fmax_kwdscores_by_taxonID(1, 1, 9606)
 
-print(cobj.author_list)
+#print(cobj.author_list)
 
+
+parser = argparse.ArgumentParser(description="This command line program will output csv files or plots for CAFA3"
+                                             " file data. Plots will ")
+#parser.add_argument('raw data directory path', metavar='raw data path', type='string', nargs='+', help=
+#                    "This is the path to the directory that contains the CAFA raw submissions "
+#                    "files for each lab team. ")
+parser.add_argument('raw data directory path', metavar='raw data path', nargs='+', help=
+                    "This is the path to the directory that contains the CAFA raw submissions "
+                    "files for each lab team. ")
+
+args = parser.parse_args()
+print(args)
 # Test raw keyword counts
 
 
@@ -50,9 +63,23 @@ print(cobj.author_list)
 #cobj.plot_ontology_score_results('MFO', taxonID=9606)
 #cobj.csv_ontology_score_results('MFO', 1, 1, taxonID=9606)
 
-cobj.kwdscores_by_taxon('CCO', taxonID=9606)
-cobj.plot_ontology_score_results('CCO', taxonID=9606)
-#cobj.csv_ontology_score_results('CCO', 1, 1, taxonID=9606)
+#cobj.kwdscores_by_taxon('CCO', taxonID=9606)
+#cobj.plot_ontology_score_results('CCO', taxonID=9606)
+#cobj.plot_ontology_score_results('CCO', 8, 6, 6, 8, 12, "00ff00", "10aa10", taxonID=9606, mode=1, type=2)
+
+#cobj.kwdscores_by_taxon('CCO', taxonName='all', mode=1, type=1)
+#cobj.plot_ontology_score_results(8, 6, 6, 8, 12, "00ff00", "10aa10")
+#cobj.csv_ontology_score_results()
+
+#cobj.kwdscores_by_taxon('BPO', taxonName='all', mode=1, type=1)
+#cobj.plot_ontology_score_results(8, 6, 6, 8, 12, "00ff00", "10aa10")
+#cobj.csv_ontology_score_results()
+
+#cobj.kwdscores_by_taxon('BPO', taxonName='HUMAN', mode=1, type=1)
+#cobj.plot_ontology_score_results(8, 6, 6, 8, 12, "00ff00", "10aa10")
+#cobj.csv_ontology_score_results()
+
+
 # End test relative fmax scores and equal weights scores, specific taxon
 
 
@@ -70,14 +97,14 @@ cobj.plot_ontology_score_results('CCO', taxonID=9606)
 #cobj.plot_ontology_fmax_results('MFO')
 #cobj.csv_ontology_fmax_results(1, 1, 9606)
 
-print("\n\nAuthor List:")
+#print("\n\nAuthor List:")
 #print(cobj.keyword_relative_fmax_score)
 #print(cobj.keyword_fmax_score_template)
 #print(cobj.author_list)
-cobj.create_taxon_id_dictionary()
-print(cobj.taxon_id_counts)
-cobj.create_taxon_id_list()
-print(cobj.taxon_id_list)
+#cobj.create_taxon_id_dictionary()
+#print(cobj.taxon_id_counts)
+#cobj.create_taxon_id_list()
+#print(cobj.taxon_id_list)
 
 #ontologies_list = ('BPO', 'CCO', 'MFO')
 #bpo_taxons = ("ARATH", "BACSU", "CANAX", "DANRE", "DICDI", "DROME", "ECOLI", "eukarya", "HUMAN", "MOUSE", "prokarya", "RAT", "SCHPO")

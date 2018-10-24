@@ -1,13 +1,13 @@
 
-#DATA_ROOT_DIRECTORY = 'data/raw_submission'
-DATA_ROOT_DIRECTORY = 'E:\Code Projects\Friedberg Lab\data\\raw_submission'
+DATA_ROOT_DIRECTORY = 'data/raw_submission'
+#DATA_ROOT_DIRECTORY = 'E:\Code Projects\Friedberg Lab\data\\raw_submission'
 #CSV_OUTPUT_DIRECTORY = 'csv_files'
-CSV_OUTPUT_DIRECTORY = 'E:\Code Projects\Friedberg Lab\csv_files'
-#TAR_DATA_ROOT_DIRECTORY = 'data'
+CSV_OUTPUT_DIRECTORY = 'csv_files/ont_human'
+#CSV_OUTPUT_DIRECTORY = 'E:\Code Projects\Friedberg Lab\csv_files'
 TAR_DATA_ROOT_DIRECTORY = 'data'
 TAR_FILE_NAME = 'raw_submission.tar.gz'
-#FMAX_FILES_DIRECTORY = 'fmax_data/sheets_20180507'
-FMAX_FILES_DIRECTORY = 'E:\Code Projects\Friedberg Lab\data\sheets_20180507'
+FMAX_FILES_DIRECTORY = 'fmax_data/sheets_20180507'
+#FMAX_FILES_DIRECTORY = 'E:\Code Projects\Friedberg Lab\data\sheets_20180507'
 
 USE_ZIPPED_FILES = False  # True
 
