@@ -22,10 +22,15 @@ class Cafa3:
             'genome environment': 0, 'operon': 0, 'ortholog': 0, 'paralog': 0, 'homolog': 0, 'hidden Markov model': 0,
             'clinical data': 0, 'genetic data': 0, 'natural language processing': 0, 'other functional information': 0}
 
+        # File path vars for input and output.
         self.data_root_directory = ''
         self.zip_data_directory = ''
         self.fmax_files_directory = ''
         self.csv_output_files_directory = ''
+
+        # Dictionary that contains all authors along with their taxon, model, and keywrod data. This drives everything
+        # in the class
+        self.author_list = {}
 
         # Taxon to be used for this instance. Note both name and ID must refer to the same taxon.
         self.taxon_name = 'None'  # Taxon name
@@ -43,15 +48,20 @@ class Cafa3:
         self.bnchmrk_type = 1   # Default type.
 
         # initialize relative fmax scores dict and scores by equal weighting
-        self.keyword_relative_fmax_score = {}
-        self.keyword_equal_wts_score = {}
         self.keyword_relative_fmax_score = self.keyword_template.copy()
         self.keyword_equal_wts_score = self.keyword_template.copy()
 
-        self.author_list = {}
+        # Initialize raw counts dictionaries. One for total keywords counts and one for a particular
+        # model (either model 1, 2, or 3)
+        self.total_keyword_count = self.keyword_template.copy()
+        self.model_keyword_count = self.keyword_template.copy()
+        self.model = 0  # Set once a call to count_kwds() is made, used by subsequent call to plot_raw_keyword_counts()
 
         self.fmax_sum = 0
         self.total_num_fmax_scores = 0
+
+        # Create author dictionary with taxon, model, and keyword data. Populates self.author_list.
+        self.create_author_kwd_taxon_dict()
 
     def set_path_cafa_team_files(self, path):
         self.data_root_directory = path
@@ -129,8 +139,17 @@ class Cafa3:
 #            file_name = self.fmax_files_directory + '/' + ontology.lower() + "_all_type" + str(bnchmrk_type) + '_' +\
 #                    'mode' + str(bnchmrk_mode) + '_all_fmax_sheet.csv'
 #        else:
+#        file_name = self.fmax_files_directory + '/' + ontology.lower() + "_" + self.taxon_name + '_' + "type" +\
+#            str(self.bnchmrk_type) + '_' + 'mode' + str(self.bnchmrk_mode) + '_all_fmax_sheet.csv'
+
+        # For Linux path
         file_name = self.fmax_files_directory + '/' + ontology.lower() + "_" + self.taxon_name + '_' + "type" +\
             str(self.bnchmrk_type) + '_' + 'mode' + str(self.bnchmrk_mode) + '_all_fmax_sheet.csv'
+
+        # For Windows 10 path
+        # file_name = self.fmax_files_directory + '\\' + ontology.lower() + "_" + self.taxon_name + '_' + "type" +\
+        #    str(self.bnchmrk_type) + '_' + 'mode' + str(self.bnchmrk_mode) + '_all_fmax_sheet.csv'
+
 
         with open(file_name, newline='') as csvfile:
             reader = csv.DictReader(csvfile)
@@ -164,22 +183,22 @@ class Cafa3:
                     else:
                         # print("B \'"+self.taxonName+"\'")
                         if team in self.author_list:
-                            if str(taxon_id) in self.author_list[team]:
-                                if model in self.author_list[team][str(taxon_id)]:
-                                    for kwd in self.author_list[team][str(taxon_id)][model]:
+                            if str(self.taxon_id) in self.author_list[team]:
+                                if model in self.author_list[team][str(self.taxon_id)]:
+                                    for kwd in self.author_list[team][str(self.taxon_id)][model]:
                                         self.keyword_relative_fmax_score[kwd] += float(row['F1-max'])/self.fmax_sum
                                         self.keyword_equal_wts_score[kwd] += 1.0/self.total_num_fmax_scores
                                 else:
                                     raise KeyError("Model " + model + " not found in author_list for taxonID: " +
-                                                   str(taxon_id) + " Author: " + team)
+                                                   str(self.taxon_id) + " Author: " + team)
                             else:
-                                raise KeyError("TaxonID: " + str(taxon_id) + "not found in author list for author: "
+                                raise KeyError("TaxonID: " + str(self.taxon_id) + "not found in author list for author: "
                                                + team)
                         else:
-                            raise KeyError(team + " not found in author_list for taxonID: " + str(taxon_id))
+                            raise KeyError(team + " not found in author_list for taxonID: " + str(self.taxon_id))
                         # print(str(i)+":"+team + " not found in author_list for taxonID: " + str(taxon_id))
 
-    ''' Plots the relative frequency and the relative frequency weighted by fmax   
+    ''' Plots the relative frequency and the raw counts weighted by fmax   
     '''
     def plot_ontology_score_results(self, ontology, **kwargs):
 
@@ -258,7 +277,7 @@ class Cafa3:
 
     ''' Precondition: Must have called self.fmax_kwdscores_by_taxonID() first.
     '''
-    def csv_ontology_score_results(self, ontology, bnchmrk_type, bnchmrk_mode, taxon_id):
+    def csv_ontology_score_results(self, ontology, bnchmrk_type, bnchmrk_mode, **kwargs):
 
         # Create CVS Header
         csv_header = list(const.METHODOLOGY_KEYWORDS)
@@ -300,7 +319,7 @@ class Cafa3:
                         print("C \'" + self.taxon_name + "\'")
 
                         if team in self.author_list:
-                            for(taxon_id) in self.author_list[team]:
+                            for taxon_id in self.author_list[team]:
                                 if model in self.author_list[team][str(taxon_id)]:
 
                                     out_dict.clear()
@@ -318,28 +337,33 @@ class Cafa3:
                             raise KeyError(team + " not found in author_list for taxonID: " + str(taxon_id))
 
                     else:
-                        print("D \'" + self.taxon_name + "\'")
+#                        print("D \'" + self.taxon_name + "\'")
+#                        print("THIS IS MY AUTHOR LIST")
+#                        print(self.author_list)
+#                        print("Author TAXON")
+#                        print(self.author_list[team][str(self.taxon_id)])
+
                         if team in self.author_list:
-                            if str(taxon_id) in self.author_list[team]:
-                                if model in self.author_list[team][str(taxon_id)]:
+                            if str(self.taxon_id) in self.author_list[team]:
+                                if model in self.author_list[team][str(self.taxon_id)]:
 
                                     out_dict.clear()
                                     out_dict['Team'] = team
-                                    out_dict['Taxon ID'] = taxon_id
+                                    out_dict['Taxon ID'] = str(self.taxon_id)
                                     out_dict['Model Number'] = model
                                     out_dict["Fmax in " + ontology + "_" + "t" + str(bnchmrk_type) + "_m" +
                                              str(bnchmrk_mode)] = fmax
                                     out_dict["Equal weights"] = 1.0 / self.total_num_fmax_scores
                                     out_dict['Relative Fmax'] = float(fmax) / self.fmax_sum
 
-                                    for kwd in self.author_list[team][str(taxon_id)][model]:
+                                    for kwd in self.author_list[team][str(self.taxon_id)][model]:
                                         out_dict[kwd] = 1
                                 else:
                                     raise KeyError("Model " + model + " not found in author_list for taxonID: " +
                                                    str(taxon_id) + " Author: " + team)
                             else:
-                                raise KeyError("TaxonID: " + str(taxon_id) + "not found in author list for author: "
-                                               + team)
+                                raise KeyError("TaxonID: " + str(self.taxon_id) + " not found in author list "
+                                                                                  "for author: " + team)
                         else:
                             raise KeyError(team + " not found in author_list for taxonID: " + str(taxon_id))
 
@@ -377,7 +401,7 @@ class Cafa3:
             #    cur_line = cur_line.decode('utf-8')
 
             if 'AUTHOR' not in cur_line:
-                print("\nError: AUTHOR not found in file.")
+                print("\nWarning: AUTHOR not found in file.")
                 Cafa3.printfile(file_list[file]['path'], file)
                 break
 
@@ -391,7 +415,7 @@ class Cafa3:
             #    cur_line = cur_line.decode('utf-8')
 
             if 'MODEL' not in cur_line:
-                print("\nError: MODEL not found in file.")
+                print("\nWarning: MODEL not found in file.")
                 Cafa3.printfile(file_list[file]['path'], file)
                 break
 
@@ -406,7 +430,7 @@ class Cafa3:
 
             # Check if model # and Author (Team Name) are the 1st two items in the file name per CAFA specifications
             if author_in_file.lower() != file_str_split[0].lower() or model_in_file != file_str_split[1]:
-                print("\nError: filename conflicts with file data")
+                print("\nWarning: filename conflicts with file data")
                 print("\tFile: "+file_list[file]['path'] + "/" + file)
                 # print("\tFilename string: ", file)
                 # print("\tFile string parse:", file_str_split)
@@ -426,7 +450,7 @@ class Cafa3:
             #    cur_line = cur_line.decode('utf-8')
 
             if 'KEYWORDS' not in cur_line:
-                print("\nError: KEYWORDS tag not found in file.")
+                print("\nWarning: KEYWORDS tag not found in file.")
                 Cafa3.printfile(file_list[file]['path'], file)
                 break
 
@@ -444,7 +468,7 @@ class Cafa3:
             # Check if the keywords in this file are one of the Cafa3 accepted keywords
             for kwrd in keywords:
                 if kwrd not in const.METHODOLOGY_KEYWORDS:
-                    print("\nError: keyword", "\""+kwrd+"\"", "not an acceptable methodology keyword in file:")
+                    print("\nWarning: keyword", "\""+kwrd+"\"", "not an acceptable methodology keyword in file:")
                     Cafa3.printfile(file_list[file]['path'], file)
                     break
 
@@ -465,7 +489,7 @@ class Cafa3:
             # So report error. In this case the current Model # will overwrite the prior model # for this taxon_id.
             # Probably should handle this better in the future.
             else:
-                print("\nError: duplicate Model # found for Taxon ID")
+                print("\nWarning: duplicate Model # found for Taxon ID")
                 print("\tTaxonID:", taxon_id)
                 print("\tModel #:", model)
                 print("\tConflicting file:")
@@ -537,3 +561,100 @@ class Cafa3:
 
         return file_count
 
+    def count_kwds(self, model):
+        self.model = model
+        self.total_keyword_count = self.keyword_template.copy()
+        self.model_keyword_count = self.keyword_template.copy()
+
+        print("BEFORE CALC")
+        #print(methodology_keyword_count)
+        print(self.model_keyword_count)
+
+        # 1. Determine total keyword count by model
+        # 2. Determine overall total keyword count
+        for author in self.author_list:
+            for taxon_id in self.author_list[author]:
+                for mdl in self.author_list[author][taxon_id]:
+                    for kwrd in self.author_list[author][taxon_id][mdl]:
+                        # key_counts['Methodology Keyword Count'] += 1
+                        self.total_keyword_count[kwrd] += 1
+                        if mdl == model:
+                            self.model_keyword_count[kwrd] += 1
+
+        print("AFTER CALC")
+        #print(methodology_keyword_count)
+        print(self.model_keyword_count)
+
+    def plot_raw_keyword_counts(self, width, height, x_font_size, y_font_size, label_font_size, bar_hex_color):
+        plt.rc('xtick', labelsize=x_font_size)
+        plt.rc('ytick', labelsize=y_font_size)
+        plt.rcParams.update({'font.size': label_font_size})
+
+        fig, ax = plt.subplots(figsize=(width, height))
+        fig.canvas.set_window_title("Raw Keyword Counts Model " + self.model)
+
+        ax.set_ylabel("Raw Counts")
+        ax.set_xlabel("Keyword")
+
+        bar_width = 0.4
+
+        x_index = np.arange(0, len(self.model_keyword_count))
+
+        # Sort in descending order
+        sorted_scores = sorted(self.model_keyword_count.items(), key=operator.itemgetter(1), reverse=True)
+        x_ticks = []  # range(0,len(sorted_fmax_rel))
+        y1 = []
+        for kwd, val in sorted_scores:
+            x_ticks.append(kwd)
+            y1.append(val)
+        plt.bar(x_index, y1, bar_width, color='#'+bar_hex_color, label="Equal Weights")
+
+        plt.legend()
+        plt.xticks(x_index, x_ticks)
+        plt.xticks(rotation=90)
+        plt.tight_layout()
+        plt.show()
+
+    # Creates two csv files. First csv file outputs all the authors' taxonIDs and models and shows the keywords used
+    # The second csv file output the total keywords counts and the total keyword counts by model
+    def create_keycount_csv(self):
+        csv_header = list(const.METHODOLOGY_KEYWORDS)
+        csv_header.insert(0, "Team")
+        csv_header.insert(1, "Taxon ID")
+        csv_header.insert(2, "Model Number")
+
+        # Create csv file of keywords used for each team's taxonID and model #
+        with open(const.CSV_OUTPUT_DIRECTORY+'/team_model_taxonID_keyword.csv', 'w', newline='') as csvfile:
+            writer = csv.DictWriter(csvfile, fieldnames=csv_header)
+            writer.writeheader()
+            for author in self.author_list:
+                for taxonID in self.author_list[author]:
+                    for model in self.author_list[author][taxonID]:
+                        outline = self.author_list[author][taxonID][model].copy()
+                        outline['Team'] = author
+                        outline['Taxon ID'] = taxonID
+                        outline['Model Number'] = model
+                        writer.writerow(outline)  # end of 1st csv file creation
+
+        # Create csv file for total keyword counts and total keywords count by model #
+        self.count_kwds('1')
+        csv_header = list(const.METHODOLOGY_KEYWORDS)
+        csv_header.insert(0, "")
+        with open(const.CSV_OUTPUT_DIRECTORY+'/total_keyword_counts.csv', 'w', newline='') as csvfile:
+            writer = csv.DictWriter(csvfile, fieldnames=csv_header)
+            writer1 = csv.writer(csvfile, delimiter=' ', quotechar="", quoting=csv.QUOTE_NONE)
+
+            writer1.writerow('Total_Keyword_Count')
+            writer.writeheader()
+            writer.writerow(self.total_keyword_count)
+
+            csv_header[0] = 'Model Number'
+            writer = csv.DictWriter(csvfile, fieldnames=csv_header)
+            writer1.writerow('')
+            writer1.writerow('Model_Keyword_Count')
+            writer.writeheader()
+            for i in ('1', '2', '3'):
+                self.count_kwds(i)
+                row = self.model_keyword_count
+                row['Model Number'] = i
+                writer.writerow(row)

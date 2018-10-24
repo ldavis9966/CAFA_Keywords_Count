@@ -166,7 +166,8 @@ def plot_raw_keyword_counts(keyword_dict, model, width, height, x_font_size, y_f
     print(index)
 
     plt.legend()
-    plt.xticks(x_index+bar_width/2, x_ticks)
+#    plt.xticks(x_index+bar_width/2, x_ticks)
+    plt.xticks(x_index, x_ticks)
     plt.xticks(rotation=90)
     plt.tight_layout()
     plt.show()
