@@ -13,7 +13,7 @@ import os
 
 class Cafa3:
 
-    def __init__(self):
+    def __init__(self, suppress_warnings):
         self.keyword_template = {
             'sequence alignment': 0, 'sequence-profile alignment': 0, 'profile-profile alignment': 0,
             'phylogeny': 0, 'sequence properties': 0, 'physicochemical properties': 0, 'predicted properties': 0,
@@ -22,6 +22,8 @@ class Cafa3:
             'comparative model': 0, 'predicted protein structure': 0, 'de novo prediction': 0, 'machine learning': 0,
             'genome environment': 0, 'operon': 0, 'ortholog': 0, 'paralog': 0, 'homolog': 0, 'hidden Markov model': 0,
             'clinical data': 0, 'genetic data': 0, 'natural language processing': 0, 'other functional information': 0}
+
+        self.suppress_warnings = suppress_warnings
 
         # File path vars for input and output.
         self.data_root_directory = ''
@@ -77,8 +79,7 @@ class Cafa3:
     def set_path_csv_out(self, path):
         self.csv_output_files_directory = path
 
-    @staticmethod
-    def create_author_list(authors_list, file_list):
+    def create_author_list(self, authors_list, file_list):
 
         files_processed = 0
 
@@ -98,7 +99,7 @@ class Cafa3:
             # if type(cur_line) is bytes:
             #    cur_line = cur_line.decode('utf-8')
 
-            if 'AUTHOR' not in cur_line:
+            if 'AUTHOR' not in cur_line and self.suppress_warnings is False:
                 print("\nWarning: AUTHOR not found in file.")
                 Cafa3.printfile(file_list[file]['path'], file)
                 break
@@ -112,7 +113,7 @@ class Cafa3:
             # if type(cur_line) is bytes:
             #    cur_line = cur_line.decode('utf-8')
 
-            if 'MODEL' not in cur_line:
+            if 'MODEL' not in cur_line and self.suppress_warnings is False:
                 print("\nWarning: MODEL not found in file.")
                 Cafa3.printfile(file_list[file]['path'], file)
                 break
@@ -127,7 +128,8 @@ class Cafa3:
             taxon_id = file_str_split[2].split('.')[0].strip(" ")
 
             # Check if model # and Author (Team Name) are the 1st two items in the file name per CAFA specifications
-            if author_in_file.lower() != file_str_split[0].lower() or model_in_file != file_str_split[1]:
+            if (author_in_file.lower() != file_str_split[0].lower() or model_in_file != file_str_split[1]) and \
+                    self.suppress_warnings is False:
                 print("\nWarning: filename conflicts with file data")
                 print("\tFile: "+file_list[file]['path'] + "/" + file)
                 # print("\tFilename string: ", file)
@@ -147,7 +149,7 @@ class Cafa3:
             # if type(cur_line) is bytes:
             #    cur_line = cur_line.decode('utf-8')
 
-            if 'KEYWORDS' not in cur_line:
+            if 'KEYWORDS' not in cur_line and self.suppress_warnings is False:
                 print("\nWarning: KEYWORDS tag not found in file.")
                 Cafa3.printfile(file_list[file]['path'], file)
                 break
@@ -165,7 +167,7 @@ class Cafa3:
 
             # Check if the keywords in this file are one of the Cafa3 accepted keywords
             for kwrd in keywords:
-                if kwrd not in const.METHODOLOGY_KEYWORDS:
+                if kwrd not in const.METHODOLOGY_KEYWORDS and self.suppress_warnings is False:
                     print("\nWarning: keyword", "\""+kwrd+"\"", "not an acceptable methodology keyword in file:")
                     Cafa3.printfile(file_list[file]['path'], file)
                     break
@@ -186,7 +188,7 @@ class Cafa3:
             # If all the prior checks fail, then there must be a double entry of the model # for current taxon_id.
             # So report error. In this case the current Model # will overwrite the prior model # for this taxon_id.
             # Probably should handle this better in the future.
-            else:
+            elif self.suppress_warnings is False:
                 print("\nWarning: duplicate Model # found for Taxon ID")
                 print("\tTaxonID:", taxon_id)
                 print("\tModel #:", model)
@@ -265,7 +267,7 @@ class Cafa3:
         author_file_list = {}
         self.author_list = {}
         Cafa3.create_file_list(author_file_list)
-        Cafa3.create_author_list(self.author_list, author_file_list)
+        self.create_author_list(self.author_list, author_file_list)
 
     # Required argument
     # ontology - Must be either BPO, MFO, or CCO

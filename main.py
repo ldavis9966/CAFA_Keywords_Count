@@ -5,7 +5,7 @@ import taxon
 import argparse
 
 
-cobj = cafa3.Cafa3()
+cobj = cafa3.Cafa3(True)
 
 #cobj.create_author_kwd_taxon_dict()
 #cobj.fmax_kwdscores_by_taxonID(1, 1, 9606)
@@ -14,16 +14,28 @@ cobj = cafa3.Cafa3()
 
 
 parser = argparse.ArgumentParser(description="This command line program will output csv files or plots for CAFA3"
-                                             " file data. Plots will ")
+                                             " file data. The csv files output can be of the raw keyword counts, raw"
+                                             "keyword counts by model number, or a scoring plot. Plots can either be of"
+                                             " several different types. or th")
 #parser.add_argument('raw data directory path', metavar='raw data path', type='string', nargs='+', help=
 #                    "This is the path to the directory that contains the CAFA raw submissions "
 #                    "files for each lab team. ")
-parser.add_argument('raw data directory path', metavar='raw data path', nargs='+', help=
-                    "This is the path to the directory that contains the CAFA raw submissions "
+parser.add_argument('raw_submissions_path', help="The path to the directory that contains the CAFA raw submissions "
                     "files for each lab team. ")
+parser.add_argument('final_results_path', nargs="?", help="The path to the directory that contains the CAFA final "
+                                                          "results files. This is only needed when using the optional "
+                                                          "arguments -? -? ")
+
+group = parser.add_mutually_exclusive_group()
+group.add_argument("-r", "--rawcounts", help="", action="store_true");
+group.add_argument("-w", "--weightedcounts", help="", action="store_true");
+
+
 
 args = parser.parse_args()
-print(args)
+#print(args)
+print(args.raw_submissions_path)
+print(args.final_results_path)
 # Test raw keyword counts
 
 
