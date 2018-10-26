@@ -26,15 +26,38 @@ parser.add_argument('final_results_path', nargs="?", help="The path to the direc
                                                           "results files. This is only needed when using the optional "
                                                           "arguments -? -? ")
 
-parser.add_argument_group("frequency", "This group of positional arguments deals exclusively with outputting csv files"
+
+'''
+group1 = parser.add_argument_group("frequency commands", "This group of positional arguments deals exclusively with outputting csv files"
                                        " and plots for the unweighted frequency of CAFA keywords.")
 
-parser.add_argument_group("weighted frequency", "This group of positional arguments deals exclusively with outputting"
+group1.add_argument('raw_submissions_path', help="The path to the directory that contains the CAFA raw submissions "
+                                                 "files for each lab team")
+
+group1.add_argument('--create_csv_file', help="This option will generate a csv file of keyword frequencies",
+                    action="store_true")
+
+group1.add_argument('--plot', help="This option will generate a plot of the keyword frequencies. By itself, "
+                                           "the plot output is the frequency of the keywords regardless of the model "
+                                           "number. If combined with the -m(--model) option, the plot will be the "
+                                           "keyword frequencies by model number.", action="store_true")
+
+
+group2 = parser.add_argument_group("relative frequency commands", "This group of positional arguments deals exclusively with outputting"
                                                 " csv files and plots for the weighted frequency of CAFA keywords.")
 
-group = parser.add_mutually_exclusive_group()
-group.add_argument("-r", "--rawcounts", help="", action="store_true");
-group.add_argument("-w", "--weightedcounts", help="", action="store_true");
+
+
+group2.add_argument('raw_submissions_path', help="The path to the directory that contains the CAFA raw submissions "
+                                                 "files for each lab team")
+
+group2.add_argument('final_results_path', nargs="?", help="The path to the directory that contains the CAFA final results files. "
+                                               "This is only needed when using the optional arguments -? -? ") '''
+
+
+#group = parser.add_mutually_exclusive_group()
+#group.add_argument("-r", "--rawcounts", help="", action="store_true");
+#group.add_argument("-w", "--weightedcounts", help="", action="store_true");
 
 
 
