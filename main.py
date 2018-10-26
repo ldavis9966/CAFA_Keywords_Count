@@ -26,6 +26,12 @@ parser.add_argument('final_results_path', nargs="?", help="The path to the direc
                                                           "results files. This is only needed when using the optional "
                                                           "arguments -? -? ")
 
+parser.add_argument_group("frequency", "This group of positional arguments deals exclusively with outputting csv files"
+                                       " and plots for the unweighted frequency of CAFA keywords.")
+
+parser.add_argument_group("weighted frequency", "This group of positional arguments deals exclusively with outputting"
+                                                " csv files and plots for the weighted frequency of CAFA keywords.")
+
 group = parser.add_mutually_exclusive_group()
 group.add_argument("-r", "--rawcounts", help="", action="store_true");
 group.add_argument("-w", "--weightedcounts", help="", action="store_true");
